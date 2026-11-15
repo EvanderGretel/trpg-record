@@ -141,7 +141,22 @@
   /* ---------- 統計 ---------- */
   .stats-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
   .stats-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+  .stats-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .stats-head select{width:auto;min-width:132px}
+
+  /* 統計範圍切換（已結團 / 進行中） */
+  .seg{
+    display:inline-flex;gap:2px;padding:3px;
+    background:var(--input-bg);border:1px solid var(--border);border-radius:10px;
+  }
+  .seg-btn{
+    font:inherit;font-size:12.5px;cursor:pointer;border:none;background:transparent;
+    color:var(--muted);padding:7px 13px;min-height:32px;border-radius:8px;
+    transition:.15s;white-space:nowrap;
+  }
+  .seg-btn:hover{color:var(--text)}
+  .seg-btn.active{background:var(--card);color:var(--accent);font-weight:600}
+  html[data-theme="light"] .seg-btn.active{box-shadow:0 1px 4px rgba(0,0,0,.08)}
 
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
   .stat{
@@ -155,6 +170,11 @@
     text-shadow:0 0 26px rgba(139,124,246,.45);
   }
   html[data-theme="light"] .stat.big .stat-value{text-shadow:none}
+  .stats.is-ongoing .stat.big .stat-value{
+    color:var(--accent2);
+    text-shadow:0 0 26px rgba(56,217,196,.42);
+  }
+  html[data-theme="light"] .stats.is-ongoing .stat.big .stat-value{text-shadow:none}
   .stat-value .unit{font-size:15px;font-weight:500;color:var(--muted);margin-left:5px;text-shadow:none}
   .stat-value.small{font-size:28px;color:var(--accent2)}
 
@@ -320,6 +340,10 @@
     .sub{font-size:12px}
     .panel{padding:16px}
     .stat.big .stat-value{font-size:38px}
+    .stats-tools{width:100%}
+    .seg{flex:1 1 100%}
+    .seg-btn{flex:1}
+    .stats-tools select{flex:1 1 100%;width:100%}
     .list-tools{width:100%}
     .list-tools input{width:100%}
     .list-tools select{flex:1 1 96px;min-width:0}
@@ -404,7 +428,8 @@
       <div class="faq-body">
         <ul>
           <li>右上角可切換年份，選「全部年份」就是全部。</li>
-          <li>只有<b>填了結團日</b>的記錄才算進統計，進行中的不算。</li>
+          <li>統計上方可切換 <b>「已結團」／「進行中」</b>：預設看已結團的，切到「進行中」就只看還沒填結團日的團務。</li>
+          <li>「已結團」以<b>結團日</b>計算年份與月份；「進行中」則以<b>開跑日</b>計算，並統計至今已經跑了幾天。</li>
         </ul>
       </div>
     </details>
@@ -436,7 +461,13 @@
   <section class="panel">
     <div class="stats-head">
       <h2>統計</h2>
-      <select id="yearSelect" aria-label="選擇年份"></select>
+      <div class="stats-tools">
+        <div class="seg" role="group" aria-label="統計範圍：已結團或進行中">
+          <button type="button" class="seg-btn active" data-stats-mode="finished" aria-pressed="true">已結團</button>
+          <button type="button" class="seg-btn" data-stats-mode="ongoing" aria-pressed="false">進行中</button>
+        </div>
+        <select id="yearSelect" aria-label="選擇年份"></select>
+      </div>
     </div>
     <div class="stats" id="stats"></div>
   </section>
@@ -446,7 +477,7 @@
     <h2>圖表</h2>
     <div class="charts">
       <div class="chart-card wide">
-        <div class="chart-title">每月結團數</div>
+        <div class="chart-title" id="chartMonthTitle">每月結團數</div>
         <div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div>
       </div>
       <div class="chart-card">
@@ -605,12 +636,16 @@
   const exportBtn  = $('exportBtn');
   const exportMenu = $('exportMenu');
   const importFile = $('importFile');
+  const statsModeBtns = document.querySelectorAll('[data-stats-mode]');
+  const chartMonthTitle = $('chartMonthTitle');
+  const chartMonthCanvas = $('chartMonth');
 
   /* ================= 狀態 ================= */
   let records   = [];
   let editingId = null;
   let deleteMode = false;
   let flashId = null;           // 剛複製出來的紀錄，短暫高亮用
+  let statsMode = 'finished';   // 'finished' = 已結團（預設）／'ongoing' = 進行中
   const selectedIds = new Set();
   const charts = {};
 
@@ -631,6 +666,12 @@
     if (!Number.isFinite(t)) return null;
     const d = Math.round(t / 86400000);
     return d >= 0 ? d : null;
+  }
+
+  function todayISO(){
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
 
   function normalizeDate(v){
@@ -704,7 +745,7 @@
       size: '多人',
       startDate: iso(start),
       endDate: iso(end),
-      note: '這是一筆範例記錄，讓你看看資料長什麼樣子。\n看完可以直接按右邊的 🗑️ 刪掉，不影響使用。\n\n小提示：結團日留空，這筆就會顯示「進行中」，也不會計入結團統計。'
+      note: '這是一筆範例記錄，讓你看看資料長什麼樣子。\n看完可以直接按右邊的 🗑️ 刪掉，不影響使用。\n\n小提示：結團日留空，這筆就會顯示「進行中」，也不會計入結團統計（但可以在統計上方切換到「進行中」查看）。'
     };
     try { localStorage.setItem(KEY, JSON.stringify([sample])); } catch (e) {}
   }
@@ -737,26 +778,41 @@
   /* ================= 統計 ================= */
   function renderStats(){
     const y = yearSelect.value;
+    const ongoing = statsMode === 'ongoing';
+    const dateKey = ongoing ? 'startDate' : 'endDate';
     const inYear = d => y === 'all' || (!!d && d.slice(0, 4) === y);
 
-    const finished = records.filter(r => r.endDate && inYear(r.endDate));
-    const total    = finished.length;
+    // 已結團 → 只看有結團日的；進行中 → 只看沒有結團日的
+    const shown = records.filter(r =>
+      (ongoing ? !r.endDate : !!r.endDate) && inYear(r[dateKey])
+    );
+    const total = shown.length;
 
-    const kp = finished.filter(r => r.role === 'KP').length;
-    const pl = finished.filter(r => r.role === 'PL').length;
+    const kp = shown.filter(r => r.role === 'KP').length;
+    const pl = shown.filter(r => r.role === 'PL').length;
     const ot = total - kp - pl;
 
     const sizeCount = {};
-    SIZES.forEach(s => { sizeCount[s] = finished.filter(r => r.size === s).length; });
+    SIZES.forEach(s => { sizeCount[s] = shown.filter(r => r.size === s).length; });
 
-    const durations = finished.map(r => daysBetween(r.startDate, r.endDate)).filter(d => d !== null);
+    const today = todayISO();
+    const durations = shown
+      .map(r => daysBetween(r.startDate, ongoing ? today : r.endDate))
+      .filter(d => d !== null);
     const avg = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
 
     const pct = n => total ? Math.round(n / total * 100) + '%' : '—';
 
+    const bigLabel = ongoing
+      ? (y === 'all' ? '進行中總數' : y + ' 年進行中')
+      : (y === 'all' ? '結團總數' : y + ' 年結團');
+    const avgLabel = ongoing ? '平均已跑天數' : '平均結團時長';
+
+    statsEl.classList.toggle('is-ongoing', ongoing);
+
     statsEl.innerHTML =
       '<div class="stat big">' +
-        '<div class="stat-label">' + (y === 'all' ? '結團總數' : y + ' 年結團') + '</div>' +
+        '<div class="stat-label">' + bigLabel + '</div>' +
         '<div class="stat-value">' + total + '<span class="unit">本</span></div>' +
       '</div>' +
       '<div class="stat">' +
@@ -776,11 +832,11 @@
         '</div>' +
       '</div>' +
       '<div class="stat">' +
-        '<div class="stat-label">平均結團時長</div>' +
+        '<div class="stat-label">' + avgLabel + '</div>' +
         '<div class="stat-value small">' + avg + '<span class="unit">天</span></div>' +
       '</div>';
 
-    return finished;
+    return shown;
   }
 
   /* ================= 圖表 ================= */
@@ -806,16 +862,26 @@
     try { charts[id] = new Chart(el, config); } catch (e) { /* noop */ }
   }
 
-  function renderCharts(finished){
+  function renderCharts(list, ongoing){
     if (typeof Chart === 'undefined') return;
     const c = chartColors();
+
+    // 圖表標題／無障礙標籤跟著統計範圍改變
+    if (chartMonthTitle) {
+      chartMonthTitle.textContent = ongoing ? '每月開跑數（進行中）' : '每月結團數';
+    }
+    if (chartMonthCanvas) {
+      chartMonthCanvas.setAttribute('aria-label',
+        ongoing ? '每月 KP 與 PL 開跑數堆疊長條圖' : '每月 KP 與 PL 結團數堆疊長條圖');
+    }
 
     const mKp = new Array(12).fill(0);
     const mPl = new Array(12).fill(0);
     const mOt = new Array(12).fill(0);
 
-    finished.forEach(r => {
-      const m = Number((r.endDate || '').slice(5, 7)) - 1;
+    list.forEach(r => {
+      const src = ongoing ? r.startDate : r.endDate;   // 進行中以開跑日計算月份
+      const m = Number((src || '').slice(5, 7)) - 1;
       if (!(m >= 0 && m < 12)) return;
       if (r.role === 'KP') mKp[m]++;
       else if (r.role === 'PL') mPl[m]++;
@@ -846,9 +912,9 @@
       }
     });
 
-    const kp = finished.filter(r => r.role === 'KP').length;
-    const pl = finished.filter(r => r.role === 'PL').length;
-    const ot = finished.length - kp - pl;
+    const kp = list.filter(r => r.role === 'KP').length;
+    const pl = list.filter(r => r.role === 'PL').length;
+    const ot = list.length - kp - pl;
     const roleLabels = [], roleData = [], roleColors = [];
     if (kp) { roleLabels.push('KP'); roleData.push(kp); roleColors.push(c.kp); }
     if (pl) { roleLabels.push('PL'); roleData.push(pl); roleColors.push(c.pl); }
@@ -881,7 +947,7 @@
       data: {
         labels: SIZES,
         datasets: [{
-          data: SIZES.map(s => finished.filter(r => r.size === s).length),
+          data: SIZES.map(s => list.filter(r => r.size === s).length),
           backgroundColor: c.sizes, borderRadius: 6
         }]
       },
@@ -1019,10 +1085,25 @@
   }
 
   function renderAll(){
-    const finished = renderStats();
-    renderCharts(finished);
+    const shown = renderStats();
+    renderCharts(shown, statsMode === 'ongoing');
     renderList();
   }
+
+  /* ================= 統計範圍切換 ================= */
+  statsModeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const next = btn.dataset.statsMode === 'ongoing' ? 'ongoing' : 'finished';
+      if (next === statsMode) return;
+      statsMode = next;
+      statsModeBtns.forEach(b => {
+        const on = (b.dataset.statsMode === 'ongoing' ? 'ongoing' : 'finished') === statsMode;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      renderAll();
+    });
+  });
 
   /* ================= 表單開關 ================= */
   function setFormOpen(open){
