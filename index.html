@@ -172,7 +172,13 @@
       <select class="control" id="filterYear" aria-label="依結團年份篩選"><option value="all">全部年份</option></select>
       <select class="control" id="filterRole" aria-label="依角色篩選"><option value="all">全部角色</option><option value="KP">KP</option><option value="PL">PL</option></select>
       <select class="control" id="filterSize" aria-label="依規模篩選"><option value="all">全部規模</option><option>單人</option><option>雙人</option><option>多人</option></select>
-      <select class="control" id="sort" aria-label="排序方式"><option value="newest">結團日（新到舊）</option><option value="oldest">結團日（舊到新）</option><option value="title">標題</option></select>
+      <select class="control" id="sort" aria-label="排序方式">
+        <option value="newest">結團日（新到舊）</option>
+        <option value="oldest">結團日（舊到新）</option>
+        <option value="durDesc">日數（長到短）</option>
+        <option value="durAsc">日數（短到長）</option>
+        <option value="title">標題</option>
+      </select>
     </div>
     <button class="btn" id="exportJson" type="button" title="匯出相容舊版的 JSON 陣列備份">JSON 備份</button>
     <button class="btn" id="exportCsv" type="button" title="匯出可用試算表開啟的 CSV">CSV 匯出</button>
@@ -236,7 +242,23 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function duration(r){if(!r.startDate||!r.endDate)return null;const n=(Date.parse(r.endDate+'T00:00:00Z')-Date.parse(r.startDate+'T00:00:00Z'))/86400000+1;return Number.isFinite(n)&&n>0?n:null}
 function years(){return [...new Set(records.map(r=>(r.endDate||'').slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse()}
 function refreshYears(){const select=$('#filterYear'),current=select.value||'all';select.innerHTML='<option value="all">全部年份</option>'+years().map(y=>`<option value="${y}">${y} 年</option>`).join('');select.value=years().includes(current)?current:'all'}
-function filtered(){const q=$('#search').value.trim().toLocaleLowerCase(),year=$('#filterYear').value;return records.filter(r=>(!q||`${r.title} ${r.note||''}`.toLocaleLowerCase().includes(q))&&(year==='all'||(r.endDate||'').slice(0,4)===year)&&($('#filterRole').value==='all'||r.role===$('#filterRole').value)&&($('#filterSize').value==='all'||r.size===$('#filterSize').value)).sort((a,b)=>{const mode=$('#sort').value;if(mode==='title')return a.title.localeCompare(b.title,'zh-Hant');const diff=String(a.endDate||'').localeCompare(String(b.endDate||''));return mode==='newest'?-diff:diff})}
+function filtered(){
+  const q=$('#search').value.trim().toLocaleLowerCase(),year=$('#filterYear').value;
+  return records.filter(r=>(!q||`${r.title} ${r.note||''}`.toLocaleLowerCase().includes(q))&&(year==='all'||(r.endDate||'').slice(0,4)===year)&&($('#filterRole').value==='all'||r.role===$('#filterRole').value)&&($('#filterSize').value==='all'||r.size===$('#filterSize').value)).sort((a,b)=>{
+    const mode=$('#sort').value;
+    if(mode==='title')return a.title.localeCompare(b.title,'zh-Hant');
+    // 新增：日數排序（長到短 / 短到長）；未填日期（dur=null）一律排最後
+    if(mode==='durDesc'||mode==='durAsc'){
+      const da=duration(a),db=duration(b);
+      if(da===null&&db===null)return 0;
+      if(da===null)return 1;
+      if(db===null)return -1;
+      return mode==='durDesc'?(db-da):(da-db);
+    }
+    const diff=String(a.endDate||'').localeCompare(String(b.endDate||''));
+    return mode==='newest'?-diff:diff;
+  });
+}
 function themeColors(){const dark=document.documentElement.dataset.theme==='dark';return{text:dark?'#aab1c2':'#5b6274',grid:dark?'#2a2e3b':'#f0f1f7',kp:dark?'#9d84ff':'#7c5cff',pl:dark?'#3ec9b8':'#2bb3a3',size:dark?['#f0b458','#6aabff','#f0789a']:['#f2a33c','#5b9dff','#e0607e']}}
 function drawChart(id,config){if(typeof Chart==='undefined')return;if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),config)}
 function renderCharts(list){
