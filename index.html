@@ -208,6 +208,9 @@
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 
   /* ---------- 圖表 ---------- */
+  .charts-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .charts-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+  #chartsBody[hidden]{display:none}
   .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .chart-card{
     background:var(--card);border:1px solid var(--border);
@@ -249,7 +252,7 @@
   html[data-theme="light"] .overlay{background:rgba(30,34,48,.38)}
   @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 
-  #formPanel.modal{
+  .panel.modal{
     position:fixed;z-index:90;
     top:50%;left:50%;
     transform:translate(-50%,-50%);
@@ -266,7 +269,7 @@
     box-shadow:0 30px 80px -24px rgba(0,0,0,.78), 0 0 0 1px rgba(255,255,255,.03);
     animation:formIn .2s cubic-bezier(.2,.9,.3,1);
   }
-  #formPanel.modal>h2{padding-right:40px}
+  .panel.modal>h2{padding-right:40px}
   @keyframes formIn{
     from{opacity:0;transform:translate(-50%,-48%) scale(.97)}
     to{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -280,7 +283,7 @@
     color:var(--muted);font-size:15px;line-height:1;cursor:pointer;
     transition:.15s;
   }
-  #formPanel.modal .modal-close{display:inline-flex}
+  .panel.modal .modal-close{display:inline-flex}
   .modal-close:hover{background:var(--hover);color:var(--text)}
 
   /* ---------- 列表 ---------- */
@@ -379,6 +382,22 @@
   .faq-body li{margin:5px 0}
   .faq-body b{color:var(--text);font-weight:600}
 
+  /* ---------- 分類管理 ---------- */
+  .cat-block{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .cat-block:last-of-type{border-bottom:none;padding-bottom:0;margin-bottom:0}
+  .cat-block-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .cat-block-head h3{margin:0;font-size:13.5px;font-weight:600;color:var(--text)}
+  .cat-count{font-size:12px;color:var(--muted)}
+  .cat-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+  .cat-item{display:flex;gap:8px;align-items:center}
+  .cat-item input{flex:1;min-width:0}
+  .cat-item .icon-btn{flex:none;opacity:.55}
+  .cat-item .icon-btn:hover{opacity:1;color:var(--danger)}
+  .cat-add{display:flex;gap:8px}
+  .cat-add input{flex:1;min-width:0}
+  .cat-add .btn{flex:none}
+  .cat-empty{margin:0;padding:10px 0;font-size:12.5px;color:var(--muted)}
+
   @media (max-width:720px){
     .charts{grid-template-columns:1fr}
     .chart-card.wide{grid-column:auto}
@@ -411,7 +430,7 @@
     input,select,textarea{font-size:16px}
 
     /* 手機：表單變成底部彈出面板 */
-    #formPanel.modal{
+    .panel.modal{
       top:auto;bottom:0;left:0;
       transform:none;
       width:100%;
@@ -425,6 +444,9 @@
       from{opacity:0;transform:translateY(26px)}
       to{opacity:1;transform:translateY(0)}
     }
+    .cat-add{flex-wrap:wrap}
+    .cat-add input{flex:1 1 100%}
+    .cat-add .btn{flex:1 1 100%}
   }
   @media (hover:none){
     .card:hover{border-color:var(--border)}
@@ -497,22 +519,34 @@
           <li>右上角可切換年份，選「全部年份」就是全部。</li>
           <li>統計上方可切換 <b>「已結團」／「進行中」</b>：預設看已結團的，切到「進行中」就只看還沒填結團日的團務。</li>
           <li>「已結團」以<b>結團日</b>計算年份與月份；「進行中」則以<b>開跑日</b>計算，並統計至今已經跑了幾天。</li>
+          <li>統計會分別列出<b>人數分類</b>與<b>劇本類型</b>的數量；圖表預設收起，按「展開圖表」才顯示。</li>
         </ul>
       </div>
     </details>
 
     <details class="faq">
-      <summary>④ 找不到某筆記錄？</summary>
+      <summary>④ 分類管理（人數／劇本類型）</summary>
       <div class="faq-body">
         <ul>
-          <li>搜尋框可以搜<b>劇本名稱、系統、備註</b>。</li>
+          <li>點列表工具列的「⚙️ 分類管理」，可以調整<b>人數</b>與<b>劇本類型</b>的選項。</li>
+          <li>新增的分類會立即出現在表單與篩選選單中。</li>
+          <li>重新命名會同步更新既有記錄的對應值；刪除分類後，既有記錄會保留原本的名稱（只是不再出現在選單裡）。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>⑤ 找不到某筆記錄？</summary>
+      <div class="faq-body">
+        <ul>
+          <li>搜尋框可以搜<b>劇本名稱、系統、劇本類型、備註</b>。</li>
           <li>旁邊的選單可以篩身份、人數，也能改排序方式。</li>
         </ul>
       </div>
     </details>
 
     <details class="faq">
-      <summary>⑤ 備份！換裝置前一定要看</summary>
+      <summary>⑥ 備份！換裝置前一定要看</summary>
       <div class="faq-body">
         <ul>
           <li>資料只存在這台裝置的瀏覽器裡，不會上傳到任何地方。</li>
@@ -539,21 +573,30 @@
     <div class="stats" id="stats"></div>
   </section>
 
-  <!-- 圖表 -->
+  <!-- 圖表（預設收起，點開才展開） -->
   <section class="panel">
-    <h2>圖表</h2>
-    <div class="charts">
-      <div class="chart-card wide">
-        <div class="chart-title" id="chartMonthTitle">每月結團數</div>
-        <div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">角色比例</div>
-        <div class="canvas-box"><canvas id="chartRole" aria-label="KP、PL、其他比例圓環圖"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">人數規模</div>
-        <div class="canvas-box"><canvas id="chartSize" aria-label="人數規模橫向長條圖"></canvas></div>
+    <div class="charts-head">
+      <h2>圖表</h2>
+      <button class="btn ghost" id="chartsToggle" type="button" aria-expanded="false" aria-controls="chartsBody">展開圖表 ▾</button>
+    </div>
+    <div id="chartsBody" hidden>
+      <div class="charts">
+        <div class="chart-card wide">
+          <div class="chart-title" id="chartMonthTitle">每月結團數</div>
+          <div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">角色比例</div>
+          <div class="canvas-box"><canvas id="chartRole" aria-label="KP、PL、其他比例圓環圖"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">人數規模</div>
+          <div class="canvas-box"><canvas id="chartSize" aria-label="人數規模橫向長條圖"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">劇本類型</div>
+          <div class="canvas-box"><canvas id="chartType" aria-label="劇本類型分佈圓環圖"></canvas></div>
+        </div>
       </div>
     </div>
   </section>
@@ -563,7 +606,7 @@
     <div class="list-head">
       <h2>團務記錄 <span id="count"></span></h2>
       <div class="list-tools">
-        <input id="search" type="search" placeholder="搜尋劇本／系統／備註">
+        <input id="search" type="search" placeholder="搜尋劇本／系統／類型／備註">
         <select id="filterRole" aria-label="依身份篩選">
           <option value="all">全部身份</option>
           <option value="KP">只看 KP</option>
@@ -572,10 +615,6 @@
         </select>
         <select id="filterSize" aria-label="依人數類型篩選">
           <option value="all">全部規模</option>
-          <option value="1v1">1v1</option>
-          <option value="單人">單人</option>
-          <option value="雙人">雙人</option>
-          <option value="多人">多人</option>
         </select>
         <select id="sort" aria-label="排序方式">
           <option value="newest">結團日（新→舊）</option>
@@ -584,6 +623,7 @@
           <option value="durAsc">團期（短→長）</option>
           <option value="title">標題</option>
         </select>
+        <button class="btn" id="catBtn" type="button">⚙️ 分類管理</button>
         <button class="btn" id="bulkToggle" type="button">批量管理</button>
         <button class="btn primary" id="newBtn" type="button" aria-expanded="false" aria-controls="formPanel">＋ 新增記錄</button>
       </div>
@@ -622,10 +662,12 @@
         </label>
         <label>人數類型
           <select id="f_size">
-            <option value="1v1">1v1</option>
-            <option value="單人">單人</option>
-            <option value="雙人">雙人</option>
-            <option value="多人" selected>多人</option>
+            <option value="多人">多人</option>
+          </select>
+        </label>
+        <label>劇本類型
+          <select id="f_type">
+            <option value="">（未分類）</option>
           </select>
         </label>
         <label>開跑日期
@@ -643,6 +685,43 @@
         <button type="button" class="btn ghost" id="cancelEdit" hidden>取消編輯</button>
       </div>
     </form>
+  </section>
+
+  <!-- 分類管理面板 -->
+  <div class="overlay" id="catOverlay" hidden></div>
+  <section class="panel" id="catPanel" hidden>
+    <button type="button" class="modal-close" id="catClose" aria-label="關閉分類管理">✕</button>
+    <h2>分類管理</h2>
+    <p class="help-lead">管理表單與篩選可用的「人數」與「劇本類型」。重新命名會同步更新既有記錄；刪除後既有記錄會保留原分類名稱。</p>
+
+    <div class="cat-block">
+      <div class="cat-block-head">
+        <h3>人數分類</h3>
+        <span class="cat-count" id="catSizeCount"></span>
+      </div>
+      <div class="cat-list" id="catSizeList"></div>
+      <div class="cat-add">
+        <input id="catSizeNew" placeholder="輸入新的人數分類" maxlength="20">
+        <button class="btn" id="catSizeAdd" type="button">新增</button>
+      </div>
+    </div>
+
+    <div class="cat-block">
+      <div class="cat-block-head">
+        <h3>劇本類型</h3>
+        <span class="cat-count" id="catTypeCount"></span>
+      </div>
+      <div class="cat-list" id="catTypeList"></div>
+      <div class="cat-add">
+        <input id="catTypeNew" placeholder="輸入新的劇本類型" maxlength="20">
+        <button class="btn" id="catTypeAdd" type="button">新增</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn primary" id="catSave" type="button">儲存變更</button>
+      <button class="btn ghost" id="catCancel" type="button">取消</button>
+    </div>
   </section>
 
   <datalist id="systems">
@@ -671,9 +750,13 @@
 
   /* ================= 常數 / DOM ================= */
   const KEY = 'trpg_records_v1';
+  const CAT_KEY = 'trpg_categories_v1';
   const THEME_KEY = 'trpg_theme_v1';
   const ROLES = ['KP','PL','其他'];
-  const SIZES = ['1v1','單人','雙人','多人'];   // 1v1 置於最前
+  const DEFAULT_CATEGORIES = {
+    sizes: ['1v1','單人','雙人','多人'],
+    types: ['秘匿','公開','KPLESS']
+  };
 
   const $ = id => document.getElementById(id);
   const yearSelect = $('yearSelect');
@@ -690,6 +773,7 @@
   const f_system   = $('f_system');
   const f_role     = $('f_role');
   const f_size     = $('f_size');
+  const f_type     = $('f_type');
   const f_start    = $('f_start');
   const f_end      = $('f_end');
   const f_note     = $('f_note');
@@ -710,13 +794,32 @@
   const statsModeBtns = document.querySelectorAll('[data-stats-mode]');
   const chartMonthTitle = $('chartMonthTitle');
   const chartMonthCanvas = $('chartMonth');
+  const chartsToggle = $('chartsToggle');
+  const chartsBody   = $('chartsBody');
+  const catBtn       = $('catBtn');
+  const catPanel     = $('catPanel');
+  const catOverlay   = $('catOverlay');
+  const catClose     = $('catClose');
+  const catSizeList  = $('catSizeList');
+  const catTypeList  = $('catTypeList');
+  const catSizeNew   = $('catSizeNew');
+  const catTypeNew   = $('catTypeNew');
+  const catSizeAdd   = $('catSizeAdd');
+  const catTypeAdd   = $('catTypeAdd');
+  const catSave      = $('catSave');
+  const catCancel    = $('catCancel');
+  const catSizeCount = $('catSizeCount');
+  const catTypeCount = $('catTypeCount');
 
   /* ================= 狀態 ================= */
   let records   = [];
+  let categories = null;
   let editingId = null;
   let deleteMode = false;
-  let flashId = null;           // 剛複製出來的紀錄，短暫高亮用
-  let statsMode = 'finished';   // 'finished' = 已結團（預設）／'ongoing' = 進行中
+  let flashId = null;
+  let statsMode = 'finished';
+  let chartsOpen = false;
+  let catDraft = null;
   const selectedIds = new Set();
   const charts = {};
 
@@ -763,16 +866,72 @@
     const startDate = normalizeDate(r.startDate);
     const endDate   = normalizeDate(r.endDate);
     if (startDate === null || endDate === null) return null;
+    const rawSize = String(r.size == null ? '' : r.size).trim();
+    const rawType = String(r.scenarioType == null ? '' : r.scenarioType).trim();
     return {
       id: (typeof r.id === 'string' && r.id) ? r.id : uid(),
       title: title,
       system: String(r.system == null ? '' : r.system).trim(),
       role: ROLES.indexOf(r.role) > -1 ? r.role : 'KP',
-      size: SIZES.indexOf(r.size) > -1 ? r.size : '多人',
+      size: rawSize || (categories.sizes[0] || ''),
+      scenarioType: rawType,
       startDate: startDate,
       endDate: endDate,
       note: String(r.note == null ? '' : r.note).trim()
     };
+  }
+
+  /* ================= 分類 ================= */
+  function loadCategories(){
+    try {
+      const raw = localStorage.getItem(CAT_KEY);
+      if (!raw) return JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+      const obj = JSON.parse(raw);
+      const clean = arr => Array.isArray(arr)
+        ? arr.map(s => String(s == null ? '' : s).trim()).filter(Boolean)
+        : [];
+      const sizes = clean(obj.sizes);
+      const types = clean(obj.types);
+      return {
+        sizes: sizes.length ? sizes : DEFAULT_CATEGORIES.sizes.slice(),
+        types: types.length ? types : DEFAULT_CATEGORIES.types.slice()
+      };
+    } catch (e) {
+      return JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    }
+  }
+
+  function saveCategoriesToStorage(cat){
+    try {
+      localStorage.setItem(CAT_KEY, JSON.stringify(cat));
+      return true;
+    } catch (e) {
+      alert('儲存分類失敗：瀏覽器儲存空間可能已滿。');
+      return false;
+    }
+  }
+
+  /* 表單 / 篩選用的分類選單（含記錄中出現但設定檔沒有的舊值） */
+  function fillCategorySelects(){
+    // 表單：人數
+    f_size.innerHTML = categories.sizes
+      .map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
+    // 表單：劇本類型（含「未分類」）
+    f_type.innerHTML = '<option value="">（未分類）</option>' +
+      categories.types.map(t => '<option value="' + esc(t) + '">' + esc(t) + '</option>').join('');
+
+    // 篩選：人數
+    const prevVal = filterSize.value || 'all';
+    const extraSizes = [...new Set(records.map(r => r.size).filter(Boolean))]
+      .filter(s => categories.sizes.indexOf(s) === -1);
+    const allSizes = categories.sizes.concat(extraSizes);
+    filterSize.innerHTML = '<option value="all">全部規模</option>' +
+      allSizes.map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
+    if (prevVal === 'all' || allSizes.indexOf(prevVal) > -1) {
+      filterSize.value = prevVal;
+    } else {
+      filterSize.value = 'all';
+    }
   }
 
   /* ================= 儲存 ================= */
@@ -799,7 +958,7 @@
   /* ================= 首次開啟的範例資料 ================= */
   function seedSampleIfEmpty(){
     try {
-      if (localStorage.getItem(KEY) !== null) return;   // 已有資料（含空陣列）就不動
+      if (localStorage.getItem(KEY) !== null) return;
     } catch (e) { return; }
 
     const pad = n => String(n).padStart(2, '0');
@@ -814,6 +973,7 @@
       system: 'CoC 7th',
       role: 'KP',
       size: '多人',
+      scenarioType: '秘匿',
       startDate: iso(start),
       endDate: iso(end),
       note: '這是一筆範例記錄，讓你看看資料長什麼樣子。\n看完可以直接按右邊的 🗑️ 刪掉，不影響使用。\n\n小提示：結團日留空，這筆就會顯示「進行中」，也不會計入結團統計（但可以在統計上方切換到「進行中」查看）。'
@@ -853,7 +1013,6 @@
     const dateKey = ongoing ? 'startDate' : 'endDate';
     const inYear = d => y === 'all' || (!!d && d.slice(0, 4) === y);
 
-    // 已結團 → 只看有結團日的；進行中 → 只看沒有結團日的
     const shown = records.filter(r =>
       (ongoing ? !r.endDate : !!r.endDate) && inYear(r[dateKey])
     );
@@ -863,8 +1022,20 @@
     const pl = shown.filter(r => r.role === 'PL').length;
     const ot = total - kp - pl;
 
+    /* 人數分類：設定檔的分類 + 資料中出現但設定檔沒有的舊值 */
+    const extraSizes = [...new Set(shown.map(r => r.size).filter(Boolean))]
+      .filter(s => categories.sizes.indexOf(s) === -1);
+    const sizeList = categories.sizes.concat(extraSizes);
     const sizeCount = {};
-    SIZES.forEach(s => { sizeCount[s] = shown.filter(r => r.size === s).length; });
+    sizeList.forEach(s => { sizeCount[s] = shown.filter(r => r.size === s).length; });
+
+    /* 劇本類型：設定檔的分類 + 資料中出現但設定檔沒有的舊值 + 未分類 */
+    const extraTypes = [...new Set(shown.map(r => r.scenarioType).filter(Boolean))]
+      .filter(t => categories.types.indexOf(t) === -1);
+    const typeList = categories.types.concat(extraTypes);
+    const typeCount = {};
+    typeList.forEach(t => { typeCount[t] = shown.filter(r => r.scenarioType === t).length; });
+    const unclassified = shown.filter(r => !r.scenarioType).length;
 
     const today = todayISO();
     const durations = shown
@@ -881,6 +1052,15 @@
 
     statsEl.classList.toggle('is-ongoing', ongoing);
 
+    const sizeRows = sizeList.map(s =>
+      '<div class="role-row"><span class="tag">' + esc(s) + '</span><b>' + sizeCount[s] + '</b><span class="pct">' + pct(sizeCount[s]) + '</span></div>'
+    ).join('') || '<div class="role-row"><span class="tag">（無）</span><b>0</b><span class="pct">—</span></div>';
+
+    const typeRows = typeList.map(t =>
+      '<div class="role-row"><span class="tag">' + esc(t) + '</span><b>' + typeCount[t] + '</b><span class="pct">' + pct(typeCount[t]) + '</span></div>'
+    ).join('') +
+    (unclassified ? '<div class="role-row"><span class="tag">未分類</span><b>' + unclassified + '</b><span class="pct">' + pct(unclassified) + '</span></div>' : '');
+
     statsEl.innerHTML =
       '<div class="stat big">' +
         '<div class="stat-label">' + bigLabel + '</div>' +
@@ -896,10 +1076,12 @@
       '</div>' +
       '<div class="stat">' +
         '<div class="stat-label">人數類型</div>' +
+        '<div class="roles">' + sizeRows + '</div>' +
+      '</div>' +
+      '<div class="stat">' +
+        '<div class="stat-label">劇本類型</div>' +
         '<div class="roles">' +
-          SIZES.map(s =>
-            '<div class="role-row"><span class="tag">' + s + '</span><b>' + sizeCount[s] + '</b><span class="pct">' + pct(sizeCount[s]) + '</span></div>'
-          ).join('') +
+          (typeRows || '<div class="role-row"><span class="tag">（無）</span><b>0</b><span class="pct">—</span></div>') +
         '</div>' +
       '</div>' +
       '<div class="stat">' +
@@ -920,8 +1102,11 @@
       pl:   light ? '#3d8fe8' : '#6cb6ff',
       ot:   light ? '#9aa0b5' : '#b8bcce',
       sizes: light
-        ? ['#7b5cf0', '#0f9e8e', '#2f8fd8', '#d9537a']
-        : ['#8b7cf6', '#38d9c4', '#6cb6ff', '#ef5b7f']
+        ? ['#7b5cf0', '#0f9e8e', '#2f8fd8', '#d9537a', '#e08c2e']
+        : ['#8b7cf6', '#38d9c4', '#6cb6ff', '#ef5b7f', '#f2a65a'],
+      types: light
+        ? ['#7b5cf0', '#0f9e8e', '#2f8fd8', '#d9537a', '#e08c2e', '#9aa0b5']
+        : ['#8b7cf6', '#38d9c4', '#6cb6ff', '#ef5b7f', '#f2a65a', '#b8bcce']
     };
   }
 
@@ -937,7 +1122,6 @@
     if (typeof Chart === 'undefined') return;
     const c = chartColors();
 
-    // 圖表標題／無障礙標籤跟著統計範圍改變
     if (chartMonthTitle) {
       chartMonthTitle.textContent = ongoing ? '每月開跑數（進行中）' : '每月結團數';
     }
@@ -951,7 +1135,7 @@
     const mOt = new Array(12).fill(0);
 
     list.forEach(r => {
-      const src = ongoing ? r.startDate : r.endDate;   // 進行中以開跑日計算月份
+      const src = ongoing ? r.startDate : r.endDate;
       const m = Number((src || '').slice(5, 7)) - 1;
       if (!(m >= 0 && m < 12)) return;
       if (r.role === 'KP') mKp[m]++;
@@ -1013,13 +1197,19 @@
       }
     });
 
+    /* 人數規模（動態分類 + 舊值） */
+    const extraSizes = [...new Set(list.map(r => r.size).filter(Boolean))]
+      .filter(s => categories.sizes.indexOf(s) === -1);
+    const sizeLabels = categories.sizes.concat(extraSizes);
+
     drawChart('chartSize', {
       type: 'bar',
       data: {
-        labels: SIZES,
+        labels: sizeLabels,
         datasets: [{
-          data: SIZES.map(s => list.filter(r => r.size === s).length),
-          backgroundColor: c.sizes, borderRadius: 6
+          data: sizeLabels.map(s => list.filter(r => r.size === s).length),
+          backgroundColor: sizeLabels.map((_, i) => c.sizes[i % c.sizes.length]),
+          borderRadius: 6
         }]
       },
       options: {
@@ -1031,6 +1221,50 @@
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.x + ' 本' } }
+        }
+      }
+    });
+
+    /* 劇本類型（動態分類 + 舊值 + 未分類） */
+    const extraTypes = [...new Set(list.map(r => r.scenarioType).filter(Boolean))]
+      .filter(t => categories.types.indexOf(t) === -1);
+    const typeLabelsAll = categories.types.concat(extraTypes);
+    const typeLabels = [];
+    const typeData = [];
+    const typeColors = [];
+    typeLabelsAll.forEach((t, i) => {
+      const n = list.filter(r => r.scenarioType === t).length;
+      if (n > 0) {
+        typeLabels.push(t);
+        typeData.push(n);
+        typeColors.push(c.types[i % c.types.length]);
+      }
+    });
+    const unclassifiedCount = list.filter(r => !r.scenarioType).length;
+    if (unclassifiedCount > 0) {
+      typeLabels.push('未分類');
+      typeData.push(unclassifiedCount);
+      typeColors.push(c.grid);
+    }
+
+    drawChart('chartType', {
+      type: 'doughnut',
+      data: {
+        labels: typeLabels.length ? typeLabels : ['尚無資料'],
+        datasets: [{
+          data: typeData.length ? typeData : [1],
+          backgroundColor: typeData.length ? typeColors : [c.grid],
+          borderWidth: 0, hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: c.text } },
+          tooltip: {
+            enabled: typeData.length > 0,
+            callbacks: { label: ctx => ' ' + ctx.label + '：' + ctx.parsed + ' 本' }
+          }
         }
       }
     });
@@ -1046,7 +1280,7 @@
       if (fr !== 'all' && r.role !== fr) return false;
       if (fs !== 'all' && r.size !== fs) return false;
       if (kw) {
-        const hay = [r.title, r.system, r.note].join(' ').toLowerCase();
+        const hay = [r.title, r.system, r.scenarioType, r.note].join(' ').toLowerCase();
         if (hay.indexOf(kw) === -1) return false;
       }
       return true;
@@ -1067,7 +1301,7 @@
 
       const oa = a.endDate ? 1 : 0;
       const ob = b.endDate ? 1 : 0;
-      if (mode === 'newest' && oa !== ob) return oa - ob;   // 進行中置頂
+      if (mode === 'newest' && oa !== ob) return oa - ob;
 
       const da = a.endDate || a.startDate || '';
       const db = b.endDate || b.startDate || '';
@@ -1104,7 +1338,8 @@
             '<h3>' + (esc(r.title) || '（未命名）') + '</h3>' +
             '<div class="badges">' +
               '<span class="badge ' + roleCls + '">' + esc(r.role) + '</span>' +
-              '<span class="tag">' + esc(r.size) + '</span>' +
+              (r.size ? '<span class="tag">' + esc(r.size) + '</span>' : '') +
+              (r.scenarioType ? '<span class="tag">' + esc(r.scenarioType) + '</span>' : '') +
               (ongoing ? '<span class="badge live">進行中</span>' : '') +
             '</div>' +
           '</div>' +
@@ -1157,7 +1392,7 @@
 
   function renderAll(){
     const shown = renderStats();
-    renderCharts(shown, statsMode === 'ongoing');
+    if (chartsOpen) renderCharts(shown, statsMode === 'ongoing');
     renderList();
   }
 
@@ -1174,6 +1409,15 @@
       });
       renderAll();
     });
+  });
+
+  /* ================= 圖表展開／收起 ================= */
+  chartsToggle.addEventListener('click', () => {
+    chartsOpen = !chartsOpen;
+    chartsBody.hidden = !chartsOpen;
+    chartsToggle.textContent = chartsOpen ? '收起圖表 ▴' : '展開圖表 ▾';
+    chartsToggle.setAttribute('aria-expanded', String(chartsOpen));
+    if (chartsOpen) renderAll();
   });
 
   /* ================= 背景捲動鎖定 ================= */
@@ -1197,7 +1441,7 @@
     document.body.classList.remove('modal-open');
   }
 
-  /* ================= 表單開關（彈出視窗，不捲動頁面） ================= */
+  /* ================= 表單開關 ================= */
   function setFormOpen(open){
     if (open) {
       formPanel.hidden = false;
@@ -1213,11 +1457,24 @@
     newBtn.setAttribute('aria-expanded', String(open));
   }
 
+  function setSelectValue(select, value){
+    if (!value) { select.value = ''; return; }
+    let opt = Array.prototype.slice.call(select.options).find(o => o.value === value);
+    if (!opt) {
+      opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value + '（已刪除）';
+      select.appendChild(opt);
+    }
+    select.value = value;
+  }
+
   function resetForm(){
     editingId = null;
     form.reset();
     f_role.value = 'KP';
-    f_size.value = '多人';
+    f_size.value = categories.sizes[0] || '';
+    f_type.value = '';
     formTitle.textContent = '新增記錄';
     submitBtn.textContent = '新增';
     cancelEdit.hidden = true;
@@ -1225,7 +1482,6 @@
 
   function openForm(){
     setFormOpen(true);
-    // 不呼叫 scrollIntoView：彈窗是 fixed，頁面捲動位置完全不變
     setTimeout(() => {
       try { f_title.focus({ preventScroll: true }); }
       catch (e) { try { f_title.focus(); } catch (e2) {} }
@@ -1238,16 +1494,15 @@
   }
 
   newBtn.addEventListener('click', () => {
-    if (!formPanel.hidden) {          // 已展開 → 收起
+    if (!formPanel.hidden) {
       closeForm();
       return;
     }
-    resetForm();                      // 展開 → 新增模式
+    resetForm();
     openForm();
   });
 
   formClose.addEventListener('click', closeForm);
-
   formOverlay.addEventListener('click', closeForm);
 
   function startEdit(id){
@@ -1257,7 +1512,8 @@
     f_title.value  = r.title || '';
     f_system.value = r.system || '';
     f_role.value   = r.role || 'KP';
-    f_size.value   = r.size || '多人';
+    setSelectValue(f_size, r.size || '');
+    setSelectValue(f_type, r.scenarioType || '');
     f_start.value  = r.startDate || '';
     f_end.value    = r.endDate || '';
     f_note.value   = r.note || '';
@@ -1275,6 +1531,7 @@
       system:    f_system.value.trim(),
       role:      f_role.value,
       size:      f_size.value,
+      scenarioType: f_type.value,
       startDate: f_start.value,
       endDate:   f_end.value,
       note:      f_note.value.trim()
@@ -1326,7 +1583,6 @@
     if (!btn) return;
     const id = btn.dataset.id;
 
-    /* ---- ⧉ 複製單條記錄 ---- */
     if (btn.dataset.act === 'copy') {
       const r = records.find(x => x.id === id);
       if (!r) return;
@@ -1414,6 +1670,155 @@
     }
   });
 
+  /* ================= 分類管理 ================= */
+  function renderCatPanel(){
+    const buildList = (container, list, cat) => {
+      container.innerHTML = list.length
+        ? list.map((item, i) =>
+            '<div class="cat-item">' +
+              '<input value="' + esc(item.val) + '" data-cat="' + cat + '" data-idx="' + i + '" maxlength="20" placeholder="分類名稱">' +
+              '<button type="button" class="icon-btn" data-del="' + cat + '" data-idx="' + i + '" title="刪除此分類" aria-label="刪除此分類">🗑️</button>' +
+            '</div>'
+          ).join('')
+        : '<p class="cat-empty">尚無分類，請在下方新增。</p>';
+    };
+    buildList(catSizeList, catDraft.sizes, 'sizes');
+    buildList(catTypeList, catDraft.types, 'types');
+    catSizeCount.textContent = catDraft.sizes.length + ' 項';
+    catTypeCount.textContent = catDraft.types.length + ' 項';
+  }
+
+  function openCatPanel(){
+    if (!formPanel.hidden) closeForm();
+    if (!catPanel.hidden) return;
+    catDraft = {
+      sizes: categories.sizes.map(s => ({ orig: s, val: s })),
+      types: categories.types.map(t => ({ orig: t, val: t }))
+    };
+    renderCatPanel();
+    catPanel.hidden = false;
+    catPanel.classList.add('modal');
+    catOverlay.hidden = false;
+    lockScroll();
+    catSizeNew.value = '';
+    catTypeNew.value = '';
+  }
+
+  function closeCatPanel(){
+    catPanel.hidden = true;
+    catPanel.classList.remove('modal');
+    catOverlay.hidden = true;
+    unlockScroll();
+    catDraft = null;
+  }
+
+  catBtn.addEventListener('click', openCatPanel);
+  catClose.addEventListener('click', closeCatPanel);
+  catCancel.addEventListener('click', closeCatPanel);
+  catOverlay.addEventListener('click', closeCatPanel);
+
+  catPanel.addEventListener('input', e => {
+    const input = e.target.closest('[data-cat]');
+    if (!input || !catDraft) return;
+    const cat = input.dataset.cat;
+    const idx = +input.dataset.idx;
+    if (catDraft[cat] && catDraft[cat][idx]) {
+      catDraft[cat][idx].val = input.value;
+    }
+  });
+
+  catPanel.addEventListener('click', e => {
+    const btn = e.target.closest('[data-del]');
+    if (!btn || !catDraft) return;
+    const cat = btn.dataset.del;
+    const idx = +btn.dataset.idx;
+    if (catDraft[cat].length <= 1) {
+      alert('至少要保留一個分類。');
+      return;
+    }
+    catDraft[cat].splice(idx, 1);
+    renderCatPanel();
+  });
+
+  function addCategory(cat, input){
+    if (!catDraft) return;
+    const v = input.value.trim();
+    if (!v) return;
+    if (catDraft[cat].some(x => x.val === v)) {
+      alert('分類已存在。');
+      return;
+    }
+    catDraft[cat].push({ orig: null, val: v });
+    input.value = '';
+    renderCatPanel();
+  }
+
+  catSizeAdd.addEventListener('click', () => addCategory('sizes', catSizeNew));
+  catTypeAdd.addEventListener('click', () => addCategory('types', catTypeNew));
+
+  catSizeNew.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addCategory('sizes', catSizeNew); }
+  });
+  catTypeNew.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); addCategory('types', catTypeNew); }
+  });
+
+  catSave.addEventListener('click', () => {
+    if (!catDraft) return;
+
+    const build = (list, label) => {
+      const trimmed = list
+        .map(x => ({ orig: x.orig, val: x.val.trim() }))
+        .filter(x => x.val);
+      if (!trimmed.length) { alert(label + '至少要保留一個分類。'); return null; }
+      const names = trimmed.map(x => x.val);
+      if (new Set(names).size !== names.length) { alert(label + '有重複的名稱，請調整。'); return null; }
+      return trimmed;
+    };
+
+    const sizeList = build(catDraft.sizes, '人數分類');
+    if (!sizeList) return;
+    const typeList = build(catDraft.types, '劇本類型');
+    if (!typeList) return;
+
+    const sizeRenames = {};
+    sizeList.forEach(x => { if (x.orig && x.orig !== x.val) sizeRenames[x.orig] = x.val; });
+    const typeRenames = {};
+    typeList.forEach(x => { if (x.orig && x.orig !== x.val) typeRenames[x.orig] = x.val; });
+
+    const hasRenames = Object.keys(sizeRenames).length || Object.keys(typeRenames).length;
+
+    const newCategories = {
+      sizes: sizeList.map(x => x.val),
+      types: typeList.map(x => x.val)
+    };
+
+    if (hasRenames) {
+      const nextRecords = records.map(r => {
+        let changed = false;
+        let nr = r;
+        if (sizeRenames[r.size]) {
+          nr = Object.assign({}, nr, { size: sizeRenames[r.size] });
+          changed = true;
+        }
+        if (typeRenames[r.scenarioType]) {
+          nr = Object.assign({}, nr, { scenarioType: typeRenames[r.scenarioType] });
+          changed = true;
+        }
+        return changed ? nr : r;
+      });
+      if (!saveRecords(nextRecords)) return;
+    }
+
+    if (!saveCategoriesToStorage(newCategories)) return;
+    categories = newCategories;
+
+    fillCategorySelects();
+    populateYears();
+    renderAll();
+    closeCatPanel();
+  });
+
   /* ================= 匯出 ================= */
   function download(name, content, type){
     const blob = new Blob([content], { type: type });
@@ -1443,8 +1848,8 @@
 
   function exportCSV(){
     if (!records.length) { alert('目前沒有記錄可以匯出'); return; }
-    const rows = [['標題', '系統', '角色', '規模', '開跑日', '結團日', '備註']].concat(
-      records.map(r => [r.title, r.system, r.role, r.size, r.startDate || '', r.endDate || '', r.note || ''])
+    const rows = [['標題', '系統', '角色', '規模', '劇本類型', '開跑日', '結團日', '備註']].concat(
+      records.map(r => [r.title, r.system, r.role, r.size, r.scenarioType || '', r.startDate || '', r.endDate || '', r.note || ''])
     );
     const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
     download('trpg-records-' + stamp() + '.csv', csv, 'text/csv;charset=utf-8');
@@ -1478,6 +1883,10 @@
     if (!exportMenu.hidden) {
       exportMenu.hidden = true;
       exportBtn.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    if (!catPanel.hidden) {
+      closeCatPanel();
       return;
     }
     if (!formPanel.hidden) {
@@ -1524,6 +1933,7 @@
       '系統':'system', 'system':'system',
       '角色':'role', '身份':'role', 'role':'role',
       '規模':'size', '人數類型':'size', 'size':'size',
+      '劇本類型':'scenarioType', '剧本类型':'scenarioType', '類型':'scenarioType', 'type':'scenarioType', 'scenarioType':'scenarioType',
       '開跑日':'startDate', '開跑日期':'startDate', 'startDate':'startDate',
       '結團日':'endDate', '結團日期':'endDate', 'endDate':'endDate',
       '備註':'note', 'note':'note'
@@ -1541,7 +1951,7 @@
   }
 
   function signature(r){
-    return [r.title.trim().toLowerCase(), r.role, r.size, r.startDate || '', r.endDate || '', r.note || ''].join('\u001f');
+    return [r.title.trim().toLowerCase(), r.role, r.size, r.scenarioType || '', r.startDate || '', r.endDate || '', r.note || ''].join('\u001f');
   }
 
   async function doImport(file){
@@ -1590,6 +2000,7 @@
       selectedIds.clear();
       closeForm();
       populateYears();
+      fillCategorySelects();
       renderAll();
       alert('匯入完成 ✅ 目前共有 ' + records.length + ' 筆紀錄。');
     }
@@ -1622,7 +2033,6 @@
 
   /* ================= 重新整理 ================= */
   reloadBtn.addEventListener('click', () => {
-    // 表單裡有沒存的內容 → 先問一下
     const hasDraft = !formPanel.hidden && (
       f_title.value.trim() || f_system.value.trim() ||
       f_start.value || f_end.value || f_note.value.trim()
@@ -1638,8 +2048,10 @@
   });
 
   /* ================= 初始化 ================= */
+  categories = loadCategories();
   seedSampleIfEmpty();
   records = loadRecords();
+  fillCategorySelects();
   populateYears();
   resetForm();
   setFormOpen(false);
