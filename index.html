@@ -208,6 +208,31 @@
   .full{grid-column:1/-1}
   .form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 
+  /* ---------- 彈出表單（Modal） ---------- */
+  .modal{
+    position:fixed;inset:0;z-index:120;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal[hidden]{display:none}
+  .modal-backdrop{
+    position:absolute;inset:0;
+    background:rgba(6,7,12,.62);
+    backdrop-filter:blur(3px);
+    animation:fadeIn .16s ease-out;
+  }
+  .modal-card{
+    position:relative;width:100%;max-width:660px;max-height:88vh;overflow-y:auto;
+    background:var(--card);border:1px solid var(--border-strong);
+    border-radius:16px;padding:22px;
+    box-shadow:0 30px 70px -24px rgba(0,0,0,.8);
+    animation:modalIn .18s ease-out;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  .modal-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+  body.modal-open{overflow:hidden}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+
   /* ---------- 列表 ---------- */
   .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
   .list-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
@@ -295,6 +320,9 @@
     .bulkbar .btn{width:100%}
     .bulkbar .spacer{display:none}
     input,select,textarea{font-size:16px}
+    /* 手機：底部彈出 */
+    .modal{padding:0;align-items:flex-end}
+    .modal-card{max-width:none;max-height:92vh;border-radius:16px 16px 0 0;padding:18px 16px 26px}
   }
   @media (hover:none){
     .card:hover{border-color:var(--border)}
@@ -356,49 +384,6 @@
     </div>
   </section>
 
-  <!-- 表單 -->
-  <section class="panel">
-    <h2 id="formTitle">新增記錄</h2>
-    <form id="recordForm" autocomplete="off">
-      <div class="form-grid">
-        <label class="full">劇本名稱
-          <input id="f_title" required maxlength="200" placeholder="例：不要叫醒沉睡的貓">
-        </label>
-        <label>系統
-          <input id="f_system" list="systems" maxlength="60" placeholder="例：CoC 7th">
-        </label>
-        <label>身份
-          <select id="f_role">
-            <option value="KP">KP（主持）</option>
-            <option value="PL">PL（玩家）</option>
-            <option value="其他">其他</option>
-          </select>
-        </label>
-        <label>人數類型
-          <select id="f_size">
-            <option value="單人">單人</option>
-            <option value="1v1">1v1</option>
-            <option value="雙人">雙人</option>
-            <option value="多人" selected>多人</option>
-          </select>
-        </label>
-        <label>開跑日期
-          <input type="date" id="f_start">
-        </label>
-        <label>結團日期 <span class="hint">留空＝進行中</span>
-          <input type="date" id="f_end">
-        </label>
-        <label class="full">備註
-          <textarea id="f_note" rows="2" maxlength="5000" placeholder="心得、劇本感想、團員……"></textarea>
-        </label>
-      </div>
-      <div class="form-actions">
-        <button type="submit" class="btn primary" id="submitBtn">新增</button>
-        <button type="button" class="btn ghost" id="cancelEdit" hidden>取消編輯</button>
-      </div>
-    </form>
-  </section>
-
   <!-- 列表 -->
   <section class="panel">
     <div class="list-head">
@@ -426,6 +411,7 @@
           <option value="title">標題</option>
         </select>
         <button class="btn" id="bulkToggle" type="button">批量管理</button>
+        <button class="btn primary" id="addBtn" type="button">＋ 新增記錄</button>
       </div>
     </div>
 
@@ -457,6 +443,55 @@
     資料儲存在此瀏覽器的 localStorage · 建議定期「匯出」備份<br>
     換裝置時用「匯入」還原 · 清除瀏覽器資料可能導致紀錄消失
   </footer>
+</div>
+
+<!-- ========== 新增／編輯彈出表單 ========== -->
+<div class="modal" id="formModal" hidden>
+  <div class="modal-backdrop" id="formBackdrop"></div>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <div class="modal-head">
+      <h2 id="formTitle">新增記錄</h2>
+      <button class="icon-btn" id="closeForm" type="button" title="關閉" aria-label="關閉">✕</button>
+    </div>
+    <form id="recordForm" autocomplete="off">
+      <div class="form-grid">
+        <label class="full">劇本名稱
+          <input id="f_title" required maxlength="200" placeholder="例：不要叫醒沉睡的貓">
+        </label>
+        <label>系統
+          <input id="f_system" list="systems" maxlength="60" placeholder="例：CoC 7th">
+        </label>
+        <label>身份
+          <select id="f_role">
+            <option value="KP">KP（主持）</option>
+            <option value="PL">PL（玩家）</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label>人數類型
+          <select id="f_size">
+            <option value="單人">單人</option>
+            <option value="1v1">1v1</option>
+            <option value="雙人">雙人</option>
+            <option value="多人" selected>多人</option>
+          </select>
+        </label>
+        <label>開跑日期
+          <input type="date" id="f_start">
+        </label>
+        <label>結團日期 <span class="hint">留空＝進行中</span>
+          <input type="date" id="f_end">
+        </label>
+        <label class="full">備註
+          <textarea id="f_note" rows="3" maxlength="5000" placeholder="心得、劇本感想、團員……"></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn primary" id="submitBtn">新增</button>
+        <button type="button" class="btn ghost" id="cancelEdit" hidden>取消編輯</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -494,6 +529,10 @@
   const exportBtn  = $('exportBtn');
   const exportMenu = $('exportMenu');
   const importFile = $('importFile');
+  const formModal  = $('formModal');
+  const addBtn     = $('addBtn');
+  const closeFormBtn = $('closeForm');
+  const formBackdrop = $('formBackdrop');
 
   /* ================= 狀態 ================= */
   let records   = [];
@@ -851,7 +890,7 @@
       ? list.map(cardHTML).join('')
       : '<p class="empty">' + (records.length
           ? '找不到符合條件的記錄。'
-          : '還沒有任何記錄。<br><strong>新增第一筆，或先「匯入」既有備份吧 ✨</strong>') + '</p>';
+          : '還沒有任何記錄。<br><strong>按右上「＋ 新增記錄」，或先「匯入」既有備份吧 ✨</strong>') + '</p>';
 
     updateBulkBar();
   }
@@ -884,7 +923,18 @@
     renderList();
   }
 
-  /* ================= 表單 ================= */
+  /* ================= 表單（彈出） ================= */
+  function openForm(){
+    formModal.hidden = false;
+    document.body.classList.add('modal-open');
+    setTimeout(() => f_title.focus(), 60);
+  }
+
+  function closeForm(){
+    formModal.hidden = true;
+    document.body.classList.remove('modal-open');
+  }
+
   function resetForm(){
     editingId = null;
     form.reset();
@@ -909,9 +959,23 @@
     formTitle.textContent = '編輯記錄';
     submitBtn.textContent = '儲存變更';
     cancelEdit.hidden = false;
-    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => f_title.focus(), 250);
+    openForm();
   }
+
+  addBtn.addEventListener('click', () => {
+    resetForm();
+    openForm();
+  });
+
+  closeFormBtn.addEventListener('click', () => {
+    resetForm();
+    closeForm();
+  });
+
+  formBackdrop.addEventListener('click', () => {
+    resetForm();
+    closeForm();
+  });
 
   form.addEventListener('submit', e => {
     e.preventDefault();
@@ -939,12 +1003,16 @@
 
     if (saveRecords(next)) {
       resetForm();
+      closeForm();
       populateYears();
       renderAll();
     }
   });
 
-  cancelEdit.addEventListener('click', resetForm);
+  cancelEdit.addEventListener('click', () => {
+    resetForm();
+    closeForm();
+  });
 
   /* ================= 列表操作 ================= */
   listEl.addEventListener('change', e => {
@@ -983,7 +1051,7 @@
       if (confirm('確定刪除「' + r.title + '」？此操作無法復原。')) {
         const next = records.filter(x => x.id !== id);
         if (saveRecords(next)) {
-          if (editingId === id) resetForm();
+          if (editingId === id) { resetForm(); closeForm(); }
           selectedIds.delete(id);
           populateYears();
           renderAll();
@@ -1095,9 +1163,14 @@
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !exportMenu.hidden) {
+    if (e.key !== 'Escape') return;
+    if (!exportMenu.hidden) {
       exportMenu.hidden = true;
       exportBtn.setAttribute('aria-expanded', 'false');
+    }
+    if (!formModal.hidden) {
+      resetForm();
+      closeForm();
     }
   });
 
@@ -1205,6 +1278,7 @@
       deleteMode = false;
       selectedIds.clear();
       resetForm();
+      closeForm();
       populateYears();
       renderAll();
       alert('匯入完成 ✅ 目前共有 ' + records.length + ' 筆紀錄。');
