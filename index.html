@@ -22,6 +22,7 @@
     .header-actions,.button-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:10px;padding:9px 13px;min-height:42px;cursor:pointer;font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
     .btn:hover{background:var(--hover)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
     .btn.primary{background:var(--accent);border-color:var(--accent);color:white}
     .btn.primary:hover{background:var(--accent-hover)}
     .btn.danger{color:var(--danger)}
@@ -45,22 +46,33 @@
     .panel.wide{grid-column:1/-1}
     .panel h2{font-size:14px;color:var(--muted);margin:0 0 10px}
     .canvas-box{height:230px;position:relative}
-    .toolbar{display:grid;grid-template-columns:1fr auto auto auto auto;gap:9px;align-items:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:10px}
-    .filters{display:flex;gap:8px;flex-wrap:wrap}
+
+    .toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:10px}
+    .filters{display:flex;gap:8px;flex-wrap:wrap;flex:1 1 320px;min-width:0}
     .control{min-height:42px;padding:9px 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--input);color:var(--text);outline:none;font-size:13px;min-width:0}
     .control:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--ring)}
     #search{width:100%;min-width:145px}
-    .count{color:var(--muted);font-size:12px;white-space:nowrap}
+    .count{color:var(--muted);font-size:12px;white-space:nowrap;margin-left:auto}
+
+    .bulkbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:12px;box-shadow:var(--shadow);margin-bottom:10px}
+    .bulkbar[hidden]{display:none}
+    .bulkbar .bulk-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;font-weight:600}
+    .bulkbar input[type=checkbox]{width:20px;height:20px;accent-color:var(--danger);cursor:pointer}
+    .bulkbar .sel-count{color:var(--muted);font-size:13px}
+    .bulkbar .spacer{flex:1}
+
     .records{display:grid;gap:10px}
     .record{padding:15px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px}
+    .record.selecting{cursor:pointer}
     .record-title{font-size:16px;font-weight:700;overflow-wrap:anywhere}
     .record-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
     .pill{display:inline-flex;align-items:center;background:var(--hover);border-radius:999px;padding:4px 9px;color:var(--muted);font-size:11px}
     .pill.kp{background:var(--soft);color:var(--accent)}
     .pill.pl{background:rgba(21,155,139,.12);color:var(--teal)}
     .record-note{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted);font-size:13px;margin-top:10px}
-    .record-actions{display:flex;gap:6px;align-self:start}
+    .record-actions{display:flex;gap:6px;align-self:start;justify-content:flex-end}
     .record-actions .btn{min-height:36px;padding:6px 10px}
+    .row-check{width:24px;height:24px;accent-color:var(--danger);cursor:pointer;flex:none}
     .empty{padding:42px 18px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border-strong);border-radius:14px;line-height:1.8}
     .empty strong{color:var(--text)}
     dialog{width:min(540px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:1px solid var(--border);border-radius:16px;padding:22px;padding-bottom:max(22px,env(safe-area-inset-bottom));background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -78,30 +90,32 @@
     .file-name{font-size:12px;color:var(--muted);min-height:18px;margin-top:7px}
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-    /* ===== 平板 / 手機 ===== */
     @media(max-width:760px){
       body{padding:16px 12px max(28px,env(safe-area-inset-bottom))}
       .header{align-items:flex-start;flex-wrap:wrap}
       .notice{font-size:11.5px}
       .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      /* 5 張卡在雙欄時最後一張單獨佔滿，避免留半格空白 */
       .stats .stat:last-child:nth-child(odd){grid-column:1/-1}
       .stat{padding:11px 12px}
       .stat-value{font-size:21px}
       .charts{grid-template-columns:1fr}
       .panel.wide{grid-column:auto}
       .canvas-box{height:200px}
-      .toolbar{grid-template-columns:1fr 1fr;padding:10px}
-      .filters{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+      .toolbar{display:grid;grid-template-columns:1fr 1fr;padding:10px}
+      .filters{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:none}
       .filters #search{grid-column:1/-1}
       .toolbar>.btn{width:100%;min-height:44px}
-      .count{grid-column:1/-1;text-align:right}
+      .count{grid-column:1/-1;text-align:right;margin-left:0}
+      .bulkbar{flex-direction:column;align-items:stretch;gap:8px}
+      .bulkbar .btn{width:100%;min-height:44px}
+      .bulkbar .spacer{display:none}
+      .bulkbar .bulk-check{justify-content:flex-start}
       .record{padding:14px;grid-template-columns:1fr}
       .record-actions{grid-row:3}
       .record-actions .btn{flex:1;min-height:42px}
+      .record.selecting .record-actions{justify-content:flex-end}
       .header-actions{gap:6px}
       .header-actions .btn{min-height:44px;padding:8px 10px}
-      /* iOS：輸入框字級 16px 以下會自動放大頁面，這裡一律拉到 16px */
       .control, .field input, .field select, .field textarea{font-size:16px}
       .field input, .field select, .field textarea{min-height:44px}
       .dialog-actions .btn{min-height:44px}
@@ -117,7 +131,6 @@
       .dialog-actions{flex-direction:column-reverse}
       .dialog-actions .btn{width:100%}
     }
-    /* 觸控裝置：不要殘留 hover 背景 */
     @media(hover:none){
       .btn:hover{background:var(--surface)}
       .btn.primary:hover{background:var(--accent)}
@@ -169,7 +182,7 @@
     <div class="filters">
       <label class="sr-only" for="search">搜尋標題與備註</label>
       <input class="control" id="search" type="search" placeholder="搜尋標題 / 備註…">
-      <select class="control" id="filterYear" aria-label="依結團年份篩選"><option value="all">全部年份</option></select>
+      <select class="control" id="filterYear" aria-label="依年份篩選"><option value="all">全部年份</option></select>
       <select class="control" id="filterRole" aria-label="依角色篩選"><option value="all">全部角色</option><option value="KP">KP</option><option value="PL">PL</option></select>
       <select class="control" id="filterSize" aria-label="依規模篩選"><option value="all">全部規模</option><option>單人</option><option>雙人</option><option>多人</option></select>
       <select class="control" id="sort" aria-label="排序方式">
@@ -183,9 +196,17 @@
     <button class="btn" id="exportJson" type="button" title="匯出相容舊版的 JSON 陣列備份">JSON 備份</button>
     <button class="btn" id="exportCsv" type="button" title="匯出可用試算表開啟的 CSV">CSV 匯出</button>
     <button class="btn" id="import" type="button">匯入</button>
-    <button class="btn danger" id="clear" type="button">清除全部</button>
+    <button class="btn" id="bulkDelete" type="button">批量管理</button>
     <span class="count" id="count">共 0 筆</span>
   </section>
+
+  <div class="bulkbar" id="bulkbar" hidden>
+    <label class="bulk-check"><input type="checkbox" id="selectAll"> 全選目前顯示</label>
+    <span class="sel-count" id="selectedCount">已選 0 筆</span>
+    <span class="spacer"></span>
+    <button class="btn danger" id="deleteSelected" type="button">刪除所選</button>
+    <button class="btn" id="exitDeleteMode" type="button">退出批量管理</button>
+  </div>
 
   <input class="file-input" id="file" type="file" accept=".json,.csv,application/json,text/csv">
   <section class="records" id="records" aria-live="polite"></section>
@@ -233,21 +254,47 @@
 const KEY='trpg_records_v1',THEME_KEY='trpg_theme_v1';
 const $=s=>document.querySelector(s);
 let records=readRecords(),editingId=null,selectedFile=null,charts={};
+let deleteMode=false;
+const selectedIds=new Set();
+
 function makeId(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,9)}
 function validRecord(r){return r&&typeof r==='object'&&!Array.isArray(r)&&typeof r.title==='string'&&r.title.trim()&&['KP','PL'].includes(r.role)&&['單人','雙人','多人'].includes(r.size)}
 function readRecords(){try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(value)?value.filter(validRecord):[]}catch{return []}}
-// 先寫入 storage 成功後才替換記憶體狀態；儲存失敗時畫面與資料都維持原樣。
 function commit(next){try{localStorage.setItem(KEY,JSON.stringify(next));records=next;render();return true}catch(error){console.error('localStorage 儲存失敗',error);alert('儲存失敗：瀏覽器儲存空間可能已滿，資料未變更。請匯出備份或釋放儲存空間後再試。');render();return false}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function duration(r){if(!r.startDate||!r.endDate)return null;const n=(Date.parse(r.endDate+'T00:00:00Z')-Date.parse(r.startDate+'T00:00:00Z'))/86400000+1;return Number.isFinite(n)&&n>0?n:null}
-function years(){return [...new Set(records.map(r=>(r.endDate||'').slice(0,4)).filter(y=>/^\d{4}$/.test(y)))].sort().reverse()}
-function refreshYears(){const select=$('#filterYear'),current=select.value||'all';select.innerHTML='<option value="all">全部年份</option>'+years().map(y=>`<option value="${y}">${y} 年</option>`).join('');select.value=years().includes(current)?current:'all'}
+
+function years(){
+  const set=new Set();
+  records.forEach(r=>{
+    const end=(r.endDate||'').slice(0,4);
+    const start=(r.startDate||'').slice(0,4);
+    if(/^\d{4}$/.test(end))set.add(end);
+    if(/^\d{4}$/.test(start))set.add(start);
+  });
+  return [...set].sort().reverse();
+}
+function refreshYears(){
+  const select=$('#filterYear'),current=select.value||'all';
+  const all=years();
+  select.innerHTML='<option value="all">全部年份</option>'+all.map(y=>`<option value="${y}">${y} 年</option>`).join('');
+  select.value=all.includes(current)?current:'all';
+}
+
 function filtered(){
   const q=$('#search').value.trim().toLocaleLowerCase(),year=$('#filterYear').value;
-  return records.filter(r=>(!q||`${r.title} ${r.note||''}`.toLocaleLowerCase().includes(q))&&(year==='all'||(r.endDate||'').slice(0,4)===year)&&($('#filterRole').value==='all'||r.role===$('#filterRole').value)&&($('#filterSize').value==='all'||r.size===$('#filterSize').value)).sort((a,b)=>{
+  return records.filter(r=>{
+    if(q && !`${r.title} ${r.note||''}`.toLocaleLowerCase().includes(q))return false;
+    if(year!=='all'){
+      const end=(r.endDate||'').slice(0,4),start=(r.startDate||'').slice(0,4);
+      if(end!==year && start!==year)return false;
+    }
+    if($('#filterRole').value!=='all' && r.role!==$('#filterRole').value)return false;
+    if($('#filterSize').value!=='all' && r.size!==$('#filterSize').value)return false;
+    return true;
+  }).sort((a,b)=>{
     const mode=$('#sort').value;
     if(mode==='title')return a.title.localeCompare(b.title,'zh-Hant');
-    // 新增：日數排序（長到短 / 短到長）；未填日期（dur=null）一律排最後
     if(mode==='durDesc'||mode==='durAsc'){
       const da=duration(a),db=duration(b);
       if(da===null&&db===null)return 0;
@@ -259,6 +306,7 @@ function filtered(){
     return mode==='newest'?-diff:diff;
   });
 }
+
 function themeColors(){const dark=document.documentElement.dataset.theme==='dark';return{text:dark?'#aab1c2':'#5b6274',grid:dark?'#2a2e3b':'#f0f1f7',kp:dark?'#9d84ff':'#7c5cff',pl:dark?'#3ec9b8':'#2bb3a3',size:dark?['#f0b458','#6aabff','#f0789a']:['#f2a33c','#5b9dff','#e0607e']}}
 function drawChart(id,config){if(typeof Chart==='undefined')return;if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),config)}
 function renderCharts(list){
@@ -294,6 +342,25 @@ function renderCharts(list){
     }
   });
 }
+
+function updateBulkBar(){
+  const bar=$('#bulkbar');
+  bar.hidden=!deleteMode;
+  if(!deleteMode)return;
+  const list=filtered();
+  const count=selectedIds.size;
+  $('#selectedCount').textContent=`已選 ${count} 筆`;
+  const delBtn=$('#deleteSelected');
+  delBtn.disabled=count===0;
+  delBtn.textContent=count?`刪除所選（${count}）`:'刪除所選';
+  const visibleIds=list.map(r=>r.id);
+  const allChecked=visibleIds.length>0&&visibleIds.every(id=>selectedIds.has(id));
+  const someChecked=visibleIds.some(id=>selectedIds.has(id));
+  const selAll=$('#selectAll');
+  selAll.checked=allChecked;
+  selAll.indeterminate=someChecked&&!allChecked;
+}
+
 function render(){
   refreshYears();
   const list=filtered();
@@ -308,29 +375,39 @@ function render(){
   $('#activeMonth').textContent=peakIndex<0?'—':`${peakIndex+1} 月（${peak} 本）`;
   $('#count').textContent=`共 ${list.length} 筆`;
   renderCharts(list);
+
+  $('#add').disabled=deleteMode;
+  $('#import').disabled=deleteMode;
+  $('#bulkDelete').textContent=deleteMode?'退出批量管理':'批量管理';
+
   const root=$('#records');
   if(!list.length){
     root.innerHTML=`<div class="empty">${records.length?'找不到符合條件的紀錄。':'還沒有紀錄。<br><strong>點「＋ 新增紀錄」開始，或匯入既有備份。</strong>'}</div>`;
+    updateBulkBar();
     return;
   }
-  root.innerHTML=list.map(r=>`<article class="record">
-    <div>
-      <div class="record-title">${esc(r.title)}</div>
-      <div class="record-meta">
-        <span class="pill ${r.role==='KP'?'kp':'pl'}">${esc(r.role)}</span>
-        <span class="pill">${esc(r.size)}</span>
-        <span class="pill">開跑 ${esc(r.startDate||'未填')}</span>
-        <span class="pill">結團 ${esc(r.endDate||'未填')}</span>
-        ${duration(r)!==null?`<span class="pill">${duration(r)} 天</span>`:''}
+  root.innerHTML=list.map(r=>{
+    const actions=deleteMode
+      ? `<div class="record-actions"><input type="checkbox" class="row-check" data-check="${esc(r.id)}" ${selectedIds.has(r.id)?'checked':''} aria-label="選擇此紀錄"></div>`
+      : `<div class="record-actions"><button class="btn" data-edit="${esc(r.id)}" type="button">編輯</button></div>`;
+    return `<article class="record ${deleteMode?'selecting':''}" data-id="${esc(r.id)}">
+      <div>
+        <div class="record-title">${esc(r.title)}</div>
+        <div class="record-meta">
+          <span class="pill ${r.role==='KP'?'kp':'pl'}">${esc(r.role)}</span>
+          <span class="pill">${esc(r.size)}</span>
+          <span class="pill">開跑 ${esc(r.startDate||'未填')}</span>
+          <span class="pill">結團 ${esc(r.endDate||'未填')}</span>
+          ${duration(r)!==null?`<span class="pill">${duration(r)} 天</span>`:''}
+        </div>
+        ${r.note?`<div class="record-note">${esc(r.note)}</div>`:''}
       </div>
-      ${r.note?`<div class="record-note">${esc(r.note)}</div>`:''}
-    </div>
-    <div class="record-actions">
-      <button class="btn" data-edit="${esc(r.id)}" type="button">編輯</button>
-      <button class="btn danger" data-delete="${esc(r.id)}" type="button">刪除</button>
-    </div>
-  </article>`).join('');
+      ${actions}
+    </article>`;
+  }).join('');
+  updateBulkBar();
 }
+
 function openEditor(id){
   editingId=id||null;
   const r=records.find(x=>x.id===id);
@@ -344,6 +421,17 @@ function openEditor(id){
   $('#recordDialog').showModal();
   $('#title').focus();
 }
+
+function setDeleteMode(on){
+  if(on){
+    if(!records.length){alert('目前沒有資料。');return}
+    if(!confirm('進入批量管理模式？\n\n⚠️ 此模式可一次選取並刪除多筆紀錄，刪除後無法復原。\n建議先按「JSON 備份」匯出資料。\n\n要進入嗎？'))return;
+  }
+  deleteMode=on;
+  selectedIds.clear();
+  render();
+}
+
 $('#add').addEventListener('click',()=>openEditor());
 $('#cancel').addEventListener('click',()=>$('#recordDialog').close());
 $('#recordForm').addEventListener('submit',e=>{
@@ -356,15 +444,60 @@ $('#recordForm').addEventListener('submit',e=>{
   const next=editingId?records.map(r=>r.id===editingId?{...r,...payload}:r):[...records,{id:makeId(),...payload}];
   if(commit(next))$('#recordDialog').close();
 });
-$('#records').addEventListener('click',e=>{
-  const edit=e.target.closest('[data-edit]'),del=e.target.closest('[data-delete]');
-  if(edit)openEditor(edit.dataset.edit);
-  if(del){
-    const r=records.find(x=>x.id===del.dataset.delete);
-    if(r&&confirm(`刪除「${r.title}」？此操作無法復原。`))commit(records.filter(x=>x.id!==r.id));
-  }
+
+$('#records').addEventListener('change',e=>{
+  const check=e.target.closest('[data-check]');
+  if(!check)return;
+  const id=check.dataset.check;
+  if(check.checked)selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkBar();
 });
-['search','filterYear','filterRole','filterSize','sort'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',render));
+
+$('#records').addEventListener('click',e=>{
+  if(deleteMode){
+    if(e.target.closest('[data-check]'))return;
+    const card=e.target.closest('.record');
+    if(card&&card.dataset.id){
+      const id=card.dataset.id;
+      if(selectedIds.has(id))selectedIds.delete(id);
+      else selectedIds.add(id);
+      render();
+    }
+    return;
+  }
+  const edit=e.target.closest('[data-edit]');
+  if(edit)openEditor(edit.dataset.edit);
+});
+
+['search','filterYear','filterRole','filterSize','sort'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',()=>{
+  if(deleteMode)selectedIds.clear();
+  render();
+}));
+
+$('#bulkDelete').addEventListener('click',()=>{
+  if(deleteMode){setDeleteMode(false);return}
+  setDeleteMode(true);
+});
+$('#exitDeleteMode').addEventListener('click',()=>setDeleteMode(false));
+
+$('#selectAll').addEventListener('change',e=>{
+  const list=filtered();
+  if(e.target.checked)list.forEach(r=>selectedIds.add(r.id));
+  else list.forEach(r=>selectedIds.delete(r.id));
+  render();
+});
+
+$('#deleteSelected').addEventListener('click',()=>{
+  const count=selectedIds.size;
+  if(!count)return;
+  const ids=new Set(selectedIds);
+  selectedIds.clear();
+  const next=records.filter(r=>!ids.has(r.id));
+  if(!commit(next))return;
+  if(!records.length)deleteMode=false;
+  render();
+});
 
 function download(name,content,type){
   const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
@@ -372,7 +505,7 @@ function download(name,content,type){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function stamp(){return new Date().toISOString().slice(0,10).replaceAll('-','')}
-// 保持既有純陣列 JSON 形狀，向下相容舊版
+
 $('#exportJson').addEventListener('click',()=>{
   if(!records.length){alert('目前沒有資料可匯出。');return}
   download(`trpg-records-${stamp()}.json`,JSON.stringify(records,null,2),'application/json;charset=utf-8');
@@ -461,10 +594,6 @@ async function importFile(file){
   }
   if(commit(next))alert(`匯入完成，目前共有 ${records.length} 筆紀錄。`);
 }
-$('#clear').addEventListener('click',()=>{
-  if(!records.length){alert('目前沒有資料。');return}
-  if(confirm(`清除全部 ${records.length} 筆紀錄？此操作無法復原，建議先匯出備份。`))commit([]);
-});
 $('#theme').addEventListener('click',()=>{
   const dark=document.documentElement.dataset.theme!=='dark';
   document.documentElement.dataset.theme=dark?'dark':'light';
@@ -477,7 +606,6 @@ try{
   document.documentElement.dataset.theme=dark?'dark':'light';
   $('#theme').textContent=dark?'☀️':'🌙';
 }catch{}
-// 主 CDN 載入失敗時，改用備援 CDN
 if(typeof Chart==='undefined'){
   const fallback=document.createElement('script');
   fallback.src='https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js';
