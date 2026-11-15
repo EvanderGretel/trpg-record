@@ -107,6 +107,10 @@
   .btn.icon{padding:9px 12px;font-size:15px}
   .btn.icon:hover{transform:none}
 
+  /* 🔄 重新整理按鈕：點擊時旋轉 */
+  #reloadBtn{transition:transform .5s cubic-bezier(.4,0,.2,1),border-color .15s,background .15s}
+  #reloadBtn.spin{transform:rotate(360deg)}
+
   /* ---------- 匯出選單 ---------- */
   .menu-wrap{position:relative}
   .menu{
@@ -323,6 +327,9 @@
     </div>
     <div class="header-actions">
       <button class="btn icon" id="themeBtn" type="button" title="切換主題" aria-label="切換主題">🌙</button>
+      <button class="btn icon" id="reloadBtn" type="button" title="重新整理（等同 Ctrl+Shift+R 強制刷新）" aria-label="重新整理頁面">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+      </button>
       <div class="menu-wrap">
         <button class="btn" id="exportBtn" type="button" aria-haspopup="true" aria-expanded="false">⬇ 匯出</button>
         <div class="menu" id="exportMenu" hidden>
@@ -501,6 +508,7 @@
   const sortEl     = $('sort');
   const bulkbar    = $('bulkbar');
   const themeBtn   = $('themeBtn');
+  const reloadBtn  = $('reloadBtn');
   const exportBtn  = $('exportBtn');
   const exportMenu = $('exportMenu');
   const importFile = $('importFile');
@@ -1290,6 +1298,23 @@
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
     applyTheme(next);
+  });
+
+  /* ================= 重新整理 ================= */
+  reloadBtn.addEventListener('click', () => {
+    // 表單裡有沒存的內容 → 先問一下
+    const hasDraft = !formPanel.hidden && (
+      f_title.value.trim() || f_system.value.trim() ||
+      f_start.value || f_end.value || f_note.value.trim()
+    );
+    if (hasDraft && !confirm('表單裡有尚未儲存的內容，重新整理會遺失。\n要繼續嗎？')) return;
+
+    reloadBtn.classList.add('spin');
+    reloadBtn.disabled = true;
+    setTimeout(() => {
+      try { location.reload(); }
+      catch (e) { window.location.href = window.location.href; }
+    }, 220);
   });
 
   /* ================= 初始化 ================= */
