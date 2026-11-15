@@ -1,619 +1,1258 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="description" content="TRPG 團務紀錄：管理 KP / PL 團務，資料儲存在瀏覽器本機。">
-  <meta name="theme-color" content="#6446e0">
-  <title>TRPG 團務紀錄</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <style>
-    :root{color-scheme:light;--bg:#f5f6fa;--surface:#fff;--border:#eceef5;--border-strong:#dde0e9;--text:#20242e;--muted:#697184;--faint:#929aaa;--accent:#6446e0;--accent-hover:#5638c9;--soft:#efeaff;--teal:#159b8b;--amber:#c9821a;--rose:#d94f72;--danger:#d94f72;--input:#fafbfe;--hover:#f5f6fa;--grid:#f0f1f7;--shadow:0 2px 12px rgba(20,25,40,.06);--ring:rgba(124,92,255,.16)}
-    html[data-theme="dark"]{color-scheme:dark;--bg:#12141a;--surface:#1b1e27;--border:#282c38;--border-strong:#353a49;--text:#e8eaf1;--muted:#aab1c2;--faint:#7d8699;--accent:#8b6dff;--accent-hover:#7a5bf0;--soft:rgba(124,92,255,.2);--teal:#3ec9b8;--amber:#f0b458;--rose:#f0789a;--danger:#f0789a;--input:#222633;--hover:#252a36;--grid:#2a2e3b;--shadow:0 2px 12px rgba(0,0,0,.2);--ring:rgba(157,132,255,.22)}
-    *{box-sizing:border-box}
-    html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-    body{margin:0;padding:24px 20px max(44px,env(safe-area-inset-bottom));font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC",sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-    button,input,select,textarea{font:inherit}
-    button{touch-action:manipulation}
-    .app{max-width:1120px;margin:auto}
-    .header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:20px}
-    h1{font-size:clamp(22px,4vw,28px);margin:0}
-    .subtitle{color:var(--muted);font-size:13px;margin:6px 0 0}
-    .header-actions,.button-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:10px;padding:9px 13px;min-height:42px;cursor:pointer;font-size:13px;font-weight:600;transition:background .15s,border-color .15s}
-    .btn:hover{background:var(--hover)}
-    .btn:disabled{opacity:.45;cursor:not-allowed}
-    .btn.primary{background:var(--accent);border-color:var(--accent);color:white}
-    .btn.primary:hover{background:var(--accent-hover)}
-    .btn.danger{color:var(--danger)}
-    .btn.icon{min-width:42px;padding:8px}
-    .notice{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:12px;padding:12px 15px;color:var(--muted);font-size:12px;line-height:1.75;margin-bottom:16px}
-    .notice p{margin:0;display:flex;gap:8px;align-items:flex-start}
-    .notice p + p{margin-top:8px}
-    .notice .ico{flex:none;line-height:1.75}
-    .notice strong{color:var(--text)}
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:16px}
-    .stat,.panel,.record{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}
-    .stat{padding:14px 16px}
-    .stat-label{color:var(--muted);font-size:12px}
-    .stat-value{font-size:24px;font-weight:750;margin-top:3px;font-variant-numeric:tabular-nums}
-    .stat-value.violet{color:var(--accent)}
-    .stat-value.teal{color:var(--teal)}
-    .stat-value.amber{color:var(--amber)}
-    .stat-value.rose{color:var(--rose)}
-    .charts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
-    .panel{padding:15px 17px;min-width:0}
-    .panel.wide{grid-column:1/-1}
-    .panel h2{font-size:14px;color:var(--muted);margin:0 0 10px}
-    .canvas-box{height:230px;position:relative}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f16">
+<title>TRPG 團務記錄</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --page-bg:
+      radial-gradient(1100px 560px at 15% -10%, #241f4d 0%, transparent 60%),
+      radial-gradient(900px 500px at 92% -5%, #10323a 0%, transparent 55%),
+      #0e0f16;
+    --panel:rgba(255,255,255,.028);
+    --card:#171926;
+    --border:#2a2d40;
+    --border-strong:#3d4160;
+    --text:#e6e8f2;
+    --muted:#8b8fa8;
+    --accent:#8b7cf6;
+    --accent2:#38d9c4;
+    --kp:#f2a65a;
+    --pl:#6cb6ff;
+    --ot:#b8bcce;
+    --danger:#ef5b7f;
+    --hover:rgba(255,255,255,.06);
+    --btn-bg:#1d2030;
+    --input-bg:#12141f;
+    --h1-a:#b9adff;
+    --h1-b:#38d9c4;
+    color-scheme:dark;
+  }
+  html[data-theme="light"]{
+    --page-bg:
+      radial-gradient(1100px 560px at 15% -10%, #e9e4ff 0%, transparent 60%),
+      radial-gradient(900px 500px at 92% -5%, #d8f4ef 0%, transparent 55%),
+      #f5f6fa;
+    --panel:#ffffff;
+    --card:#fbfbfe;
+    --border:#e6e8f0;
+    --border-strong:#cfd3e0;
+    --text:#1f2430;
+    --muted:#6b7280;
+    --accent:#7b5cf0;
+    --accent2:#0f9e8e;
+    --kp:#c9821a;
+    --pl:#2f7fd8;
+    --ot:#8b90a3;
+    --danger:#d94f72;
+    --hover:#f2f3f8;
+    --btn-bg:#ffffff;
+    --input-bg:#fafbfe;
+    --h1-a:#6c4ef0;
+    --h1-b:#0f9e8e;
+    color-scheme:light;
+  }
 
-    .toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);margin-bottom:10px}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;flex:1 1 320px;min-width:0}
-    .control{min-height:42px;padding:9px 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--input);color:var(--text);outline:none;font-size:13px;min-width:0}
-    .control:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--ring)}
-    #search{width:100%;min-width:145px}
-    .count{color:var(--muted);font-size:12px;white-space:nowrap;margin-left:auto}
+  *{box-sizing:border-box}
+  html,body{min-height:100%}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    color:var(--text);
+    background:var(--page-bg);
+    background-attachment:fixed;
+    padding:28px 16px 90px;
+    -webkit-font-smoothing:antialiased;
+    text-size-adjust:100%;
+    -webkit-text-size-adjust:100%;
+  }
+  button,input,select,textarea{font:inherit}
+  button{touch-action:manipulation}
+  .wrap{max-width:1080px;margin:0 auto}
 
-    .bulkbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:12px;box-shadow:var(--shadow);margin-bottom:10px}
-    .bulkbar[hidden]{display:none}
-    .bulkbar .bulk-check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;font-weight:600}
-    .bulkbar input[type=checkbox]{width:20px;height:20px;accent-color:var(--danger);cursor:pointer}
-    .bulkbar .sel-count{color:var(--muted);font-size:13px}
-    .bulkbar .spacer{flex:1}
+  /* ---------- Header ---------- */
+  header{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:16px;flex-wrap:wrap;margin-bottom:24px;
+  }
+  h1{
+    margin:0;font-size:26px;letter-spacing:.02em;line-height:1.25;
+    background:linear-gradient(120deg,var(--h1-a),var(--h1-b));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sub{margin:7px 0 0;font-size:13px;color:var(--muted)}
+  .header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
-    .records{display:grid;gap:10px}
-    .record{padding:15px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px}
-    .record.selecting{cursor:pointer}
-    .record-title{font-size:16px;font-weight:700;overflow-wrap:anywhere}
-    .record-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
-    .pill{display:inline-flex;align-items:center;background:var(--hover);border-radius:999px;padding:4px 9px;color:var(--muted);font-size:11px}
-    .pill.kp{background:var(--soft);color:var(--accent)}
-    .pill.pl{background:rgba(21,155,139,.12);color:var(--teal)}
-    .record-note{white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted);font-size:13px;margin-top:10px}
-    .record-actions{display:flex;gap:6px;align-self:start;justify-content:flex-end}
-    .record-actions .btn{min-height:36px;padding:6px 10px}
-    .row-check{width:24px;height:24px;accent-color:var(--danger);cursor:pointer;flex:none}
-    .empty{padding:42px 18px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--border-strong);border-radius:14px;line-height:1.8}
-    .empty strong{color:var(--text)}
-    dialog{width:min(540px,calc(100% - 24px));max-height:calc(100dvh - 24px);overflow:auto;border:1px solid var(--border);border-radius:16px;padding:22px;padding-bottom:max(22px,env(safe-area-inset-bottom));background:var(--surface);color:var(--text);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-    dialog::backdrop{background:rgba(12,15,25,.58)}
-    dialog h2{margin:0 0 17px;font-size:18px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .field{display:grid;gap:6px}
-    .field.full{grid-column:1/-1}
-    .field label{font-size:12px;color:var(--muted);font-weight:600}
-    .field input,.field select,.field textarea{width:100%;min-height:42px;padding:9px 11px;border:1px solid var(--border-strong);border-radius:9px;background:var(--input);color:var(--text);outline:none}
-    .field textarea{min-height:90px;resize:vertical}
-    .dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
-    .file-input{display:none}
-    .import-help{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 14px}
-    .file-name{font-size:12px;color:var(--muted);min-height:18px;margin-top:7px}
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  /* ---------- 按鈕 ---------- */
+  .btn{
+    font:inherit;font-size:13px;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:9px 15px;min-height:40px;border-radius:10px;
+    background:var(--btn-bg);border:1px solid var(--border);color:var(--text);
+    transition:.15s;white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--border-strong);background:var(--hover)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.primary{
+    background:linear-gradient(135deg,#7b6bf0,#5a8ef5);
+    border-color:transparent;font-weight:600;color:#fff;
+    box-shadow:0 6px 18px -8px rgba(123,107,240,.9);
+  }
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent}
+  .btn.danger{color:var(--danger)}
+  .btn.icon{padding:9px 12px;font-size:15px}
+  .btn.icon:hover{transform:none}
 
-    @media(max-width:760px){
-      body{padding:16px 12px max(28px,env(safe-area-inset-bottom))}
-      .header{align-items:flex-start;flex-wrap:wrap}
-      .notice{font-size:11.5px}
-      .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      .stats .stat:last-child:nth-child(odd){grid-column:1/-1}
-      .stat{padding:11px 12px}
-      .stat-value{font-size:21px}
-      .charts{grid-template-columns:1fr}
-      .panel.wide{grid-column:auto}
-      .canvas-box{height:200px}
-      .toolbar{display:grid;grid-template-columns:1fr 1fr;padding:10px}
-      .filters{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:none}
-      .filters #search{grid-column:1/-1}
-      .toolbar>.btn{width:100%;min-height:44px}
-      .count{grid-column:1/-1;text-align:right;margin-left:0}
-      .bulkbar{flex-direction:column;align-items:stretch;gap:8px}
-      .bulkbar .btn{width:100%;min-height:44px}
-      .bulkbar .spacer{display:none}
-      .bulkbar .bulk-check{justify-content:flex-start}
-      .record{padding:14px;grid-template-columns:1fr}
-      .record-actions{grid-row:3}
-      .record-actions .btn{flex:1;min-height:42px}
-      .record.selecting .record-actions{justify-content:flex-end}
-      .header-actions{gap:6px}
-      .header-actions .btn{min-height:44px;padding:8px 10px}
-      .control, .field input, .field select, .field textarea{font-size:16px}
-      .field input, .field select, .field textarea{min-height:44px}
-      .dialog-actions .btn{min-height:44px}
-    }
-    @media(max-width:420px){
-      .subtitle{max-width:230px}
-      .header-actions{flex-direction:column;align-items:stretch}
-      .header-actions .btn{width:42px}
-      .form-grid{grid-template-columns:1fr}
-      .field.full{grid-column:auto}
-      .filters{grid-template-columns:1fr 1fr}
-      .canvas-box{height:180px}
-      .dialog-actions{flex-direction:column-reverse}
-      .dialog-actions .btn{width:100%}
-    }
-    @media(hover:none){
-      .btn:hover{background:var(--surface)}
-      .btn.primary:hover{background:var(--accent)}
-    }
-    @media(prefers-reduced-motion:reduce){
-      *,*::before,*::after{scroll-behavior:auto!important;transition:none!important}
-    }
-  </style>
+  /* ---------- 匯出選單 ---------- */
+  .menu-wrap{position:relative}
+  .menu{
+    position:absolute;right:0;top:calc(100% + 6px);z-index:40;
+    min-width:158px;padding:6px;display:flex;flex-direction:column;gap:2px;
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    box-shadow:0 18px 40px -14px rgba(0,0,0,.65);
+  }
+  .menu[hidden]{display:none}
+  .menu button{
+    background:transparent;border:none;color:var(--text);text-align:left;
+    padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;
+  }
+  .menu button:hover{background:var(--hover)}
+
+  /* ---------- 面板 ---------- */
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+    backdrop-filter:blur(6px);
+  }
+  .panel h2{margin:0 0 14px;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+
+  /* ---------- 統計 ---------- */
+  .stats-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .stats-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+  .stats-head select{width:auto;min-width:132px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+  .stat{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:14px;padding:16px 16px 14px;min-width:0;
+  }
+  .stat-label{font-size:11.5px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+  .stat-value{font-size:34px;font-weight:800;margin-top:8px;line-height:1;font-variant-numeric:tabular-nums}
+  .stat.big .stat-value{
+    font-size:44px;color:var(--accent);
+    text-shadow:0 0 26px rgba(139,124,246,.45);
+  }
+  html[data-theme="light"] .stat.big .stat-value{text-shadow:none}
+  .stat-value .unit{font-size:15px;font-weight:500;color:var(--muted);margin-left:5px;text-shadow:none}
+  .stat-value.small{font-size:28px;color:var(--accent2)}
+  .stat-sub{font-size:12px;color:var(--muted);margin-top:10px}
+
+  .roles{margin-top:2px}
+  .role-row{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:13px}
+  .role-row b{margin-left:auto;font-size:15px;font-variant-numeric:tabular-nums}
+  .role-row .pct{color:var(--muted);font-size:11px;width:38px;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* ---------- 徽章 ---------- */
+  .badge{
+    font-size:11px;padding:2.5px 9px;border-radius:999px;
+    border:1px solid transparent;white-space:nowrap;font-weight:600;
+  }
+  .badge.kp{color:var(--kp);background:rgba(242,166,90,.12);border-color:rgba(242,166,90,.3)}
+  .badge.pl{color:var(--pl);background:rgba(108,182,255,.12);border-color:rgba(108,182,255,.3)}
+  .badge.ot{color:var(--ot);background:rgba(184,188,206,.1);border-color:rgba(184,188,206,.25)}
+  .tag{
+    font-size:11px;padding:2.5px 9px;border-radius:999px;
+    color:var(--muted);background:var(--hover);
+    border:1px solid var(--border);white-space:nowrap;
+  }
+  .badge.live{
+    color:var(--accent2);background:rgba(56,217,196,.12);
+    border-color:rgba(56,217,196,.35);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  /* ---------- 圖表 ---------- */
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .chart-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:13px;padding:14px;min-width:0;
+  }
+  .chart-card.wide{grid-column:1/-1}
+  .chart-title{font-size:11.5px;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+  .canvas-box{position:relative;height:214px}
+
+  /* ---------- 表單 ---------- */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  label{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted)}
+  label .hint{font-size:11px;opacity:.7}
+  input,select,textarea{
+    width:100%;font:inherit;font-size:14px;
+    background:var(--input-bg);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:10px 12px;min-height:42px;outline:none;transition:.15s;
+  }
+  input::placeholder,textarea::placeholder{color:var(--muted);opacity:.6}
+  input:focus,select:focus,textarea:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(139,124,246,.16);
+  }
+  textarea{resize:vertical;min-height:48px;line-height:1.55}
+  input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.65);cursor:pointer;opacity:.8}
+  html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator{filter:none}
+  .full{grid-column:1/-1}
+  .form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+  /* ---------- 列表 ---------- */
+  .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .list-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
+  .list-head h2 span{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:6px}
+  .list-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .list-tools input{width:196px}
+  .list-tools select{width:auto;min-width:112px}
+
+  .bulkbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    padding:10px 14px;margin-bottom:12px;
+    background:var(--card);border:1px solid var(--border);
+    border-left:3px solid var(--danger);border-radius:12px;
+  }
+  .bulkbar[hidden]{display:none}
+  .bulkbar .bulk-check{display:flex;flex-direction:row;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;font-weight:600}
+  .bulkbar input[type="checkbox"]{width:20px;height:20px;min-height:0;padding:0;accent-color:var(--danger);cursor:pointer;flex:none}
+  .bulkbar .sel-count{color:var(--muted);font-size:13px}
+  .bulkbar .spacer{flex:1}
+
+  .list{display:flex;flex-direction:column;gap:10px}
+  .card{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:13px;padding:14px 16px;transition:.15s;
+  }
+  .card:hover{border-color:var(--border-strong)}
+  .card.ongoing{border-left:3px solid var(--accent2)}
+  .card.selecting{cursor:pointer}
+  .row-check{
+    width:20px;height:20px;min-height:0;padding:0;margin-top:2px;
+    accent-color:var(--danger);cursor:pointer;flex:none;
+  }
+  .card-main{flex:1;min-width:0}
+  .card-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .card-title h3{margin:0;font-size:15px;font-weight:600;word-break:break-word}
+  .badges{display:flex;gap:6px;flex-wrap:wrap}
+  .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:8px}
+  .meta .sys{color:var(--accent)}
+  .meta .dur{color:var(--accent2)}
+  .note{
+    margin-top:9px;font-size:13px;line-height:1.55;color:var(--muted);
+    white-space:pre-wrap;word-break:break-word;
+    border-left:2px solid var(--border);padding-left:10px;
+  }
+  .card-actions{display:flex;gap:2px;flex-shrink:0}
+  .icon-btn{
+    background:transparent;border:none;cursor:pointer;
+    font-size:15px;padding:6px 7px;border-radius:8px;
+    opacity:.5;transition:.15s;line-height:1;
+  }
+  .icon-btn:hover{opacity:1;background:var(--hover)}
+  .empty{
+    text-align:center;color:var(--muted);font-size:13.5px;
+    padding:40px 12px;margin:0;
+    border:1px dashed var(--border);border-radius:13px;line-height:1.9;
+  }
+  .empty strong{color:var(--text)}
+
+  footer{text-align:center;font-size:11.5px;color:var(--muted);opacity:.75;margin-top:26px;line-height:1.9}
+
+  @media (max-width:720px){
+    .charts{grid-template-columns:1fr}
+    .chart-card.wide{grid-column:auto}
+    .canvas-box{height:196px}
+  }
+  @media (max-width:560px){
+    body{padding:20px 12px 70px}
+    h1{font-size:21px}
+    .sub{font-size:12px}
+    .panel{padding:16px}
+    .stat.big .stat-value{font-size:38px}
+    .list-tools{width:100%}
+    .list-tools input{width:100%}
+    .list-tools select{flex:1 1 96px;min-width:0}
+    .list-tools .btn{flex:1 1 100%}
+    .header-actions{width:100%}
+    .header-actions .btn{flex:1}
+    .header-actions .menu-wrap{flex:1;display:flex}
+    .header-actions .menu-wrap>.btn{flex:1;width:100%}
+    .menu{right:0;left:auto}
+    .card{flex-wrap:wrap}
+    .card-actions{width:100%;justify-content:flex-end}
+    .bulkbar{flex-direction:column;align-items:stretch}
+    .bulkbar .btn{width:100%}
+    .bulkbar .spacer{display:none}
+    input,select,textarea{font-size:16px}
+  }
+  @media (hover:none){
+    .card:hover{border-color:var(--border)}
+    .btn:hover{border-color:var(--border);background:var(--btn-bg)}
+    .btn.primary:hover{filter:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none!important;animation:none!important}
+  }
+</style>
 </head>
 <body>
-<main class="app">
-  <header class="header">
+<div class="wrap">
+
+  <header>
     <div>
-      <h1>TRPG 團務紀錄</h1>
-      <p class="subtitle">開跑 → 結團 ｜ KP / PL ｜ 單人 / 1v1 / 雙人 / 多人</p>
+      <h1>📖 TRPG 團務記錄</h1>
+      <p class="sub">記錄每一場開跑與結團，統計今年跑了多少本</p>
     </div>
     <div class="header-actions">
-      <button class="btn icon" id="theme" type="button" aria-label="切換深色模式" title="切換主題">🌙</button>
-      <button class="btn primary" id="add" type="button">＋ 新增紀錄</button>
+      <button class="btn icon" id="themeBtn" type="button" title="切換主題" aria-label="切換主題">🌙</button>
+      <div class="menu-wrap">
+        <button class="btn" id="exportBtn" type="button" aria-haspopup="true" aria-expanded="false">⬇ 匯出</button>
+        <div class="menu" id="exportMenu" hidden>
+          <button type="button" data-export="json">JSON 備份</button>
+          <button type="button" data-export="csv">CSV 表格</button>
+        </div>
+      </div>
+      <button class="btn" id="importBtn" type="button">⬆ 匯入</button>
+      <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" hidden>
     </div>
   </header>
 
-  <aside class="notice" aria-label="使用聲明與資料提醒">
-    <p>
-      <span class="ico" aria-hidden="true">⚠️</span>
-      <span>本工具由 <strong>AI 協助製作</strong>，可能仍有 Bug 或未盡完善之處，使用前請自行評估；若發現問題，歡迎直接修改原始碼或回報。</span>
-    </p>
-    <p>
-      <span class="ico" aria-hidden="true"></span>
-      <span><strong>提醒：</strong>紀錄僅儲存在目前瀏覽器，不會同步到其他裝置或上傳伺服器。請定期匯出備份；清除瀏覽器資料可能會刪除紀錄。</span>
-    </p>
-  </aside>
-
-  <section class="stats" aria-label="統計摘要">
-    <article class="stat"><div class="stat-label">結團總數</div><div class="stat-value violet" id="total">0</div></article>
-    <article class="stat"><div class="stat-label">KP 役</div><div class="stat-value violet" id="kpTotal">0</div></article>
-    <article class="stat"><div class="stat-label">PL 役</div><div class="stat-value teal" id="plTotal">0</div></article>
-    <article class="stat"><div class="stat-label">平均團期</div><div class="stat-value amber" id="average">0 天</div></article>
-    <article class="stat"><div class="stat-label">最活躍月份</div><div class="stat-value rose" id="activeMonth">—</div></article>
+  <!-- 統計 -->
+  <section class="panel">
+    <div class="stats-head">
+      <h2>統計</h2>
+      <select id="yearSelect" aria-label="選擇年份"></select>
+    </div>
+    <div class="stats" id="stats"></div>
   </section>
 
-  <section class="charts" aria-label="團務圖表">
-    <article class="panel wide"><h2>每月結團數（依結團月份）</h2><div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div></article>
-    <article class="panel"><h2>角色比例</h2><div class="canvas-box"><canvas id="chartRole" aria-label="KP 與 PL 比例圓環圖"></canvas></div></article>
-    <article class="panel"><h2>人數規模</h2><div class="canvas-box"><canvas id="chartSize" aria-label="單人、1v1、雙人、多人團務數量橫向長條圖"></canvas></div></article>
+  <!-- 圖表 -->
+  <section class="panel">
+    <h2>圖表</h2>
+    <div class="charts">
+      <div class="chart-card wide">
+        <div class="chart-title">每月結團數</div>
+        <div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">角色比例</div>
+        <div class="canvas-box"><canvas id="chartRole" aria-label="KP、PL、其他比例圓環圖"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">人數規模</div>
+        <div class="canvas-box"><canvas id="chartSize" aria-label="人數規模橫向長條圖"></canvas></div>
+      </div>
+    </div>
   </section>
 
-  <section class="toolbar" aria-label="紀錄工具">
-    <div class="filters">
-      <label class="sr-only" for="search">搜尋標題與備註</label>
-      <input class="control" id="search" type="search" placeholder="搜尋標題 / 備註…">
-      <select class="control" id="filterYear" aria-label="依年份篩選"><option value="all">全部年份</option></select>
-      <select class="control" id="filterRole" aria-label="依角色篩選"><option value="all">全部角色</option><option value="KP">KP</option><option value="PL">PL</option></select>
-      <select class="control" id="filterSize" aria-label="依規模篩選"><option value="all">全部規模</option><option>單人</option><option>1v1</option><option>雙人</option><option>多人</option></select>
-      <select class="control" id="sort" aria-label="排序方式">
-        <option value="newest">結團日（新到舊）</option>
-        <option value="oldest">結團日（舊到新）</option>
-        <option value="durDesc">日數（長到短）</option>
-        <option value="durAsc">日數（短到長）</option>
-        <option value="title">標題</option>
-      </select>
-    </div>
-    <button class="btn" id="exportJson" type="button" title="匯出相容舊版的 JSON 陣列備份">JSON 備份</button>
-    <button class="btn" id="exportCsv" type="button" title="匯出可用試算表開啟的 CSV">CSV 匯出</button>
-    <button class="btn" id="import" type="button">匯入</button>
-    <button class="btn" id="bulkDelete" type="button">批量管理</button>
-    <span class="count" id="count">共 0 筆</span>
+  <!-- 表單 -->
+  <section class="panel">
+    <h2 id="formTitle">新增記錄</h2>
+    <form id="recordForm" autocomplete="off">
+      <div class="form-grid">
+        <label class="full">劇本名稱
+          <input id="f_title" required maxlength="200" placeholder="例：星之繼承者">
+        </label>
+        <label>系統
+          <input id="f_system" list="systems" maxlength="60" placeholder="例：CoC 7th">
+        </label>
+        <label>身份
+          <select id="f_role">
+            <option value="KP">KP（主持）</option>
+            <option value="PL">PL（玩家）</option>
+            <option value="其他">其他</option>
+          </select>
+        </label>
+        <label>人數類型
+          <select id="f_size">
+            <option value="單人">單人</option>
+            <option value="1v1">1v1</option>
+            <option value="雙人">雙人</option>
+            <option value="多人" selected>多人</option>
+          </select>
+        </label>
+        <label>開跑日期
+          <input type="date" id="f_start">
+        </label>
+        <label>結團日期 <span class="hint">留空＝進行中</span>
+          <input type="date" id="f_end">
+        </label>
+        <label class="full">備註
+          <textarea id="f_note" rows="2" maxlength="5000" placeholder="心得、劇本感想、團員……"></textarea>
+        </label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn primary" id="submitBtn">新增</button>
+        <button type="button" class="btn ghost" id="cancelEdit" hidden>取消編輯</button>
+      </div>
+    </form>
   </section>
 
-  <div class="bulkbar" id="bulkbar" hidden>
-    <label class="bulk-check"><input type="checkbox" id="selectAll"> 全選目前顯示</label>
-    <span class="sel-count" id="selectedCount">已選 0 筆</span>
-    <span class="spacer"></span>
-    <button class="btn danger" id="deleteSelected" type="button">刪除所選</button>
-    <button class="btn" id="exitDeleteMode" type="button">退出批量管理</button>
-  </div>
+  <!-- 列表 -->
+  <section class="panel">
+    <div class="list-head">
+      <h2>記錄 <span id="count"></span></h2>
+      <div class="list-tools">
+        <input id="search" type="search" placeholder="搜尋劇本／系統／備註">
+        <select id="filterRole" aria-label="依身份篩選">
+          <option value="all">全部身份</option>
+          <option value="KP">只看 KP</option>
+          <option value="PL">只看 PL</option>
+          <option value="其他">只看其他</option>
+        </select>
+        <select id="filterSize" aria-label="依人數類型篩選">
+          <option value="all">全部規模</option>
+          <option value="單人">單人</option>
+          <option value="1v1">1v1</option>
+          <option value="雙人">雙人</option>
+          <option value="多人">多人</option>
+        </select>
+        <select id="sort" aria-label="排序方式">
+          <option value="newest">結團日（新→舊）</option>
+          <option value="oldest">結團日（舊→新）</option>
+          <option value="durDesc">團期（長→短）</option>
+          <option value="durAsc">團期（短→長）</option>
+          <option value="title">標題</option>
+        </select>
+        <button class="btn" id="bulkToggle" type="button">批量管理</button>
+      </div>
+    </div>
 
-  <input class="file-input" id="file" type="file" accept=".json,.csv,application/json,text/csv">
-  <section class="records" id="records" aria-live="polite"></section>
-</main>
+    <div class="bulkbar" id="bulkbar" hidden>
+      <label class="bulk-check"><input type="checkbox" id="selectAll"> 全選目前顯示</label>
+      <span class="sel-count" id="selectedCount">已選 0 筆</span>
+      <span class="spacer"></span>
+      <button class="btn danger" id="deleteSelected" type="button" disabled>刪除所選</button>
+      <button class="btn" id="exitBulk" type="button">退出批量</button>
+    </div>
 
-<dialog id="recordDialog">
-  <form id="recordForm">
-    <h2 id="dialogTitle">新增紀錄</h2>
-    <div class="form-grid">
-      <div class="field full"><label for="title">標題 *</label><input id="title" name="title" required maxlength="200" placeholder="團務標題"></div>
-      <div class="field"><label for="role">角色</label><select id="role" name="role"><option>KP</option><option>PL</option></select></div>
-      <div class="field"><label for="size">規模</label><select id="size" name="size"><option>單人</option><option>1v1</option><option>雙人</option><option>多人</option></select></div>
-      <div class="field"><label for="startDate">開跑日</label><input id="startDate" name="startDate" type="date"></div>
-      <div class="field"><label for="endDate">結團日</label><input id="endDate" name="endDate" type="date"></div>
-      <div class="field full"><label for="note">備註</label><textarea id="note" name="note" maxlength="5000" placeholder="KP、PL 或其他備註"></textarea></div>
-    </div>
-    <div class="dialog-actions">
-      <button class="btn" id="cancel" type="button">取消</button>
-      <button class="btn primary" type="submit">儲存</button>
-    </div>
-  </form>
-</dialog>
+    <div class="list" id="list" aria-live="polite"></div>
+  </section>
 
-<dialog id="importDialog">
-  <form id="importForm">
-    <h2>匯入資料</h2>
-    <p class="import-help">支援此工具匯出的 JSON 陣列、舊版 JSON 格式，以及 { format, version, exportedAt, records } 包裝格式；也支援包含標題、角色、規模（單人／1v1／雙人／多人）、開跑日、結團日、備註欄位的 CSV。匯入時會檢查欄位，並可選擇覆蓋或合併。</p>
-    <div class="field">
-      <label for="importMode">匯入方式</label>
-      <select id="importMode">
-        <option value="merge">合併資料（保留現有，略過重複）</option>
-        <option value="replace">覆蓋目前資料</option>
-      </select>
-    </div>
-    <div class="file-name" id="fileName">尚未選擇檔案</div>
-    <div class="dialog-actions">
-      <button class="btn" id="importCancel" type="button">取消</button>
-      <button class="btn primary" type="submit">選擇檔案並匯入</button>
-    </div>
-  </form>
-</dialog>
+  <datalist id="systems">
+    <option value="CoC 7th"></option>
+    <option value="CoC 6th"></option>
+    <option value="克蘇魯的呼喚"></option>
+    <option value="D&amp;D 5e"></option>
+    <option value="Pathfinder 2e"></option>
+    <option value="忍神"></option>
+    <option value="劍世界 2.5"></option>
+    <option value="黑暗世界"></option>
+    <option value="Fiasco"></option>
+    <option value="自由系統"></option>
+  </datalist>
+
+  <footer>
+    資料儲存在此瀏覽器的 localStorage · 建議定期「匯出」備份<br>
+    換裝置時用「匯入」還原 · 清除瀏覽器資料可能導致紀錄消失
+  </footer>
+</div>
 
 <script>
-'use strict';
-const KEY='trpg_records_v1',THEME_KEY='trpg_theme_v1';
-const SIZES=['單人','1v1','雙人','多人'];
-const $=s=>document.querySelector(s);
-let records=readRecords(),editingId=null,selectedFile=null,charts={};
-let deleteMode=false;
-const selectedIds=new Set();
+(function(){
+  'use strict';
 
-function makeId(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,9)}
-function validRecord(r){return r&&typeof r==='object'&&!Array.isArray(r)&&typeof r.title==='string'&&r.title.trim()&&['KP','PL'].includes(r.role)&&SIZES.includes(r.size)}
-function readRecords(){try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(value)?value.filter(validRecord):[]}catch{return []}}
-function commit(next){try{localStorage.setItem(KEY,JSON.stringify(next));records=next;render();return true}catch(error){console.error('localStorage 儲存失敗',error);alert('儲存失敗：瀏覽器儲存空間可能已滿，資料未變更。請匯出備份或釋放儲存空間後再試。');render();return false}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function duration(r){if(!r.startDate||!r.endDate)return null;const n=(Date.parse(r.endDate+'T00:00:00Z')-Date.parse(r.startDate+'T00:00:00Z'))/86400000+1;return Number.isFinite(n)&&n>0?n:null}
+  /* ================= 常數 / DOM ================= */
+  const KEY = 'trpg_records_v1';
+  const THEME_KEY = 'trpg_theme_v1';
+  const ROLES = ['KP','PL','其他'];
+  const SIZES = ['單人','1v1','雙人','多人'];
 
-function years(){
-  const set=new Set();
-  records.forEach(r=>{
-    const end=(r.endDate||'').slice(0,4);
-    const start=(r.startDate||'').slice(0,4);
-    if(/^\d{4}$/.test(end))set.add(end);
-    if(/^\d{4}$/.test(start))set.add(start);
-  });
-  return [...set].sort().reverse();
-}
-function refreshYears(){
-  const select=$('#filterYear'),current=select.value||'all';
-  const all=years();
-  select.innerHTML='<option value="all">全部年份</option>'+all.map(y=>`<option value="${y}">${y} 年</option>`).join('');
-  select.value=all.includes(current)?current:'all';
-}
+  const $ = id => document.getElementById(id);
+  const yearSelect = $('yearSelect');
+  const statsEl    = $('stats');
+  const form       = $('recordForm');
+  const formTitle  = $('formTitle');
+  const submitBtn  = $('submitBtn');
+  const cancelEdit = $('cancelEdit');
+  const f_title    = $('f_title');
+  const f_system   = $('f_system');
+  const f_role     = $('f_role');
+  const f_size     = $('f_size');
+  const f_start    = $('f_start');
+  const f_end      = $('f_end');
+  const f_note     = $('f_note');
+  const listEl     = $('list');
+  const countEl    = $('count');
+  const searchEl   = $('search');
+  const filterRole = $('filterRole');
+  const filterSize = $('filterSize');
+  const sortEl     = $('sort');
+  const bulkbar    = $('bulkbar');
+  const themeBtn   = $('themeBtn');
+  const exportBtn  = $('exportBtn');
+  const exportMenu = $('exportMenu');
+  const importFile = $('importFile');
 
-function filtered(){
-  const q=$('#search').value.trim().toLocaleLowerCase(),year=$('#filterYear').value;
-  return records.filter(r=>{
-    if(q && !`${r.title} ${r.note||''}`.toLocaleLowerCase().includes(q))return false;
-    if(year!=='all'){
-      const end=(r.endDate||'').slice(0,4),start=(r.startDate||'').slice(0,4);
-      if(end!==year && start!==year)return false;
+  /* ================= 狀態 ================= */
+  let records   = [];
+  let editingId = null;
+  let deleteMode = false;
+  const selectedIds = new Set();
+  const charts = {};
+
+  /* ================= 工具 ================= */
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  const fmtDate = d => d ? d.replace(/-/g, '/') : '—';
+
+  function daysBetween(a, b){
+    if (!a || !b) return null;
+    const t = Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z');
+    if (!Number.isFinite(t)) return null;
+    const d = Math.round(t / 86400000);
+    return d >= 0 ? d : null;
+  }
+
+  function normalizeDate(v){
+    const s = String(v == null ? '' : v).trim();
+    if (!s) return '';
+    const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+    if (!m) return null;
+    const y = +m[1], mo = +m[2], d = +m[3];
+    const dt = new Date(Date.UTC(y, mo - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+    return String(y).padStart(4,'0') + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+  }
+
+  function normalizeRecord(r){
+    if (!r || typeof r !== 'object' || Array.isArray(r)) return null;
+    const title = String(r.title == null ? '' : r.title).trim();
+    if (!title) return null;
+    const startDate = normalizeDate(r.startDate);
+    const endDate   = normalizeDate(r.endDate);
+    if (startDate === null || endDate === null) return null;
+    return {
+      id: (typeof r.id === 'string' && r.id) ? r.id : uid(),
+      title: title,
+      system: String(r.system == null ? '' : r.system).trim(),
+      role: ROLES.indexOf(r.role) > -1 ? r.role : 'KP',
+      size: SIZES.indexOf(r.size) > -1 ? r.size : '多人',
+      startDate: startDate,
+      endDate: endDate,
+      note: String(r.note == null ? '' : r.note).trim()
+    };
+  }
+
+  /* ================= 儲存 ================= */
+  function loadRecords(){
+    try {
+      const raw = localStorage.getItem(KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(arr)) return [];
+      return arr.map(normalizeRecord).filter(Boolean);
+    } catch (e) { return []; }
+  }
+
+  function saveRecords(next){
+    try {
+      localStorage.setItem(KEY, JSON.stringify(next));
+      records = next;
+      return true;
+    } catch (e) {
+      alert('儲存失敗：瀏覽器儲存空間可能已滿，資料未變更。\n建議先「匯出」備份，或清理瀏覽器空間後再試。');
+      return false;
     }
-    if($('#filterRole').value!=='all' && r.role!==$('#filterRole').value)return false;
-    if($('#filterSize').value!=='all' && r.size!==$('#filterSize').value)return false;
-    return true;
-  }).sort((a,b)=>{
-    const mode=$('#sort').value;
-    if(mode==='title')return a.title.localeCompare(b.title,'zh-Hant');
-    if(mode==='durDesc'||mode==='durAsc'){
-      const da=duration(a),db=duration(b);
-      if(da===null&&db===null)return 0;
-      if(da===null)return 1;
-      if(db===null)return -1;
-      return mode==='durDesc'?(db-da):(da-db);
+  }
+
+  /* ================= 年份 ================= */
+  function yearList(){
+    const set = new Set();
+    records.forEach(r => {
+      const s = (r.startDate || '').slice(0, 4);
+      const e = (r.endDate || '').slice(0, 4);
+      if (/^\d{4}$/.test(s)) set.add(s);
+      if (/^\d{4}$/.test(e)) set.add(e);
+    });
+    return [...set].sort().reverse();
+  }
+
+  function populateYears(){
+    const years = yearList();
+    const now = String(new Date().getFullYear());
+    const prev = yearSelect.value;
+    yearSelect.innerHTML = '<option value="all">全部年份</option>' +
+      years.map(y => '<option value="' + y + '">' + y + ' 年</option>').join('');
+    if (prev && (prev === 'all' || years.indexOf(prev) > -1)) {
+      yearSelect.value = prev;
+    } else {
+      yearSelect.value = years.indexOf(now) > -1 ? now : 'all';
     }
-    const diff=String(a.endDate||'').localeCompare(String(b.endDate||''));
-    return mode==='newest'?-diff:diff;
-  });
-}
+  }
 
-function themeColors(){const dark=document.documentElement.dataset.theme==='dark';return{text:dark?'#aab1c2':'#5b6274',grid:dark?'#2a2e3b':'#f0f1f7',kp:dark?'#9d84ff':'#7c5cff',pl:dark?'#3ec9b8':'#2bb3a3',size:dark?['#f0b458','#3ec9b8','#6aabff','#f0789a']:['#f2a33c','#2bb3a3','#5b9dff','#e0607e']}}
-function drawChart(id,config){if(typeof Chart==='undefined')return;if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),config)}
-function renderCharts(list){
-  if(typeof Chart==='undefined')return;
-  const c=themeColors(),kpMonths=Array(12).fill(0),plMonths=Array(12).fill(0);
-  list.forEach(r=>{const month=Number((r.endDate||'').slice(5,7))-1;if(month>=0&&month<12)(r.role==='KP'?kpMonths:plMonths)[month]++});
-  drawChart('chartMonth',{
-    type:'bar',
-    data:{labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],datasets:[
-      {label:'KP',data:kpMonths,backgroundColor:c.kp,borderRadius:5,stack:'roles'},
-      {label:'PL',data:plMonths,backgroundColor:c.pl,borderRadius:5,stack:'roles'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      scales:{x:{stacked:true,grid:{display:false},ticks:{color:c.text}},y:{stacked:true,beginAtZero:true,ticks:{precision:0,color:c.text},grid:{color:c.grid}}},
-      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,color:c.text}},tooltip:{callbacks:{label:x=>` ${x.dataset.label}：${x.parsed.y} 本`}}}
+  /* ================= 統計 ================= */
+  function renderStats(){
+    const y = yearSelect.value;
+    const inYear = d => y === 'all' || (!!d && d.slice(0, 4) === y);
+
+    const finished = records.filter(r => r.endDate && inYear(r.endDate));
+    const started  = records.filter(r => r.startDate && inYear(r.startDate));
+    const ongoing  = records.filter(r => !r.endDate);
+    const total    = finished.length;
+
+    const kp = finished.filter(r => r.role === 'KP').length;
+    const pl = finished.filter(r => r.role === 'PL').length;
+    const ot = total - kp - pl;
+
+    const sizeCount = {};
+    SIZES.forEach(s => { sizeCount[s] = finished.filter(r => r.size === s).length; });
+
+    const durations = finished.map(r => daysBetween(r.startDate, r.endDate)).filter(d => d !== null);
+    const avg = durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
+
+    const pct = n => total ? Math.round(n / total * 100) + '%' : '—';
+
+    statsEl.innerHTML =
+      '<div class="stat big">' +
+        '<div class="stat-label">' + (y === 'all' ? '結團總數' : y + ' 年結團') + '</div>' +
+        '<div class="stat-value">' + total + '<span class="unit">本</span></div>' +
+        '<div class="stat-sub">開跑 ' + started.length + ' 本 · 進行中 ' + ongoing.length + ' 本</div>' +
+      '</div>' +
+      '<div class="stat">' +
+        '<div class="stat-label">身份分佈</div>' +
+        '<div class="roles">' +
+          '<div class="role-row"><span class="badge kp">KP</span><b>' + kp + '</b><span class="pct">' + pct(kp) + '</span></div>' +
+          '<div class="role-row"><span class="badge pl">PL</span><b>' + pl + '</b><span class="pct">' + pct(pl) + '</span></div>' +
+          (ot ? '<div class="role-row"><span class="badge ot">其他</span><b>' + ot + '</b><span class="pct">' + pct(ot) + '</span></div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="stat">' +
+        '<div class="stat-label">人數類型</div>' +
+        '<div class="roles">' +
+          SIZES.map(s =>
+            '<div class="role-row"><span class="tag">' + s + '</span><b>' + sizeCount[s] + '</b><span class="pct">' + pct(sizeCount[s]) + '</span></div>'
+          ).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="stat">' +
+        '<div class="stat-label">平均結團時長</div>' +
+        '<div class="stat-value small">' + avg + '<span class="unit">天</span></div>' +
+        '<div class="stat-sub">' + durations.length + ' 本有完整起訖日期</div>' +
+      '</div>';
+
+    return finished;
+  }
+
+  /* ================= 圖表 ================= */
+  function chartColors(){
+    const light = document.documentElement.dataset.theme === 'light';
+    return {
+      text: light ? '#6b7280' : '#8b8fa8',
+      grid: light ? '#eceef5' : '#242838',
+      kp:   light ? '#e08c2e' : '#f2a65a',
+      pl:   light ? '#3d8fe8' : '#6cb6ff',
+      ot:   light ? '#9aa0b5' : '#b8bcce',
+      sizes: light
+        ? ['#7b5cf0', '#0f9e8e', '#2f8fd8', '#d9537a']
+        : ['#8b7cf6', '#38d9c4', '#6cb6ff', '#ef5b7f']
+    };
+  }
+
+  function drawChart(id, config){
+    if (typeof Chart === 'undefined') return;
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+    const el = document.getElementById(id);
+    if (!el) return;
+    try { charts[id] = new Chart(el, config); } catch (e) { /* noop */ }
+  }
+
+  function renderCharts(finished){
+    if (typeof Chart === 'undefined') return;
+    const c = chartColors();
+
+    const mKp = new Array(12).fill(0);
+    const mPl = new Array(12).fill(0);
+    const mOt = new Array(12).fill(0);
+
+    finished.forEach(r => {
+      const m = Number((r.endDate || '').slice(5, 7)) - 1;
+      if (!(m >= 0 && m < 12)) return;
+      if (r.role === 'KP') mKp[m]++;
+      else if (r.role === 'PL') mPl[m]++;
+      else mOt[m]++;
+    });
+
+    const monthDatasets = [
+      { label:'KP', data:mKp, backgroundColor:c.kp, borderRadius:4, stack:'roles' },
+      { label:'PL', data:mPl, backgroundColor:c.pl, borderRadius:4, stack:'roles' }
+    ];
+    if (mOt.some(v => v > 0)) {
+      monthDatasets.push({ label:'其他', data:mOt, backgroundColor:c.ot, borderRadius:4, stack:'roles' });
     }
-  });
-  const kp=list.filter(r=>r.role==='KP').length,pl=list.length-kp;
-  drawChart('chartRole',{
-    type:'doughnut',
-    data:{labels:['KP','PL'],datasets:[{data:[kp,pl],backgroundColor:[c.kp,c.pl],borderWidth:0,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,color:c.text}},tooltip:{callbacks:{label:x=>` ${x.label}：${x.parsed} 本`}}}
-    }
-  });
-  drawChart('chartSize',{
-    type:'bar',
-    data:{labels:SIZES,datasets:[{data:SIZES.map(size=>list.filter(r=>r.size===size).length),backgroundColor:c.size,borderRadius:6}]},
-    options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-      scales:{x:{beginAtZero:true,ticks:{precision:0,color:c.text},grid:{color:c.grid}},y:{grid:{display:false},ticks:{color:c.text}}},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>` ${x.parsed.x} 本`}}}
-    }
-  });
-}
 
-function updateBulkBar(){
-  const bar=$('#bulkbar');
-  bar.hidden=!deleteMode;
-  if(!deleteMode)return;
-  const list=filtered();
-  const count=selectedIds.size;
-  $('#selectedCount').textContent=`已選 ${count} 筆`;
-  const delBtn=$('#deleteSelected');
-  delBtn.disabled=count===0;
-  delBtn.textContent=count?`刪除所選（${count}）`:'刪除所選';
-  const visibleIds=list.map(r=>r.id);
-  const allChecked=visibleIds.length>0&&visibleIds.every(id=>selectedIds.has(id));
-  const someChecked=visibleIds.some(id=>selectedIds.has(id));
-  const selAll=$('#selectAll');
-  selAll.checked=allChecked;
-  selAll.indeterminate=someChecked&&!allChecked;
-}
+    drawChart('chartMonth', {
+      type: 'bar',
+      data: { labels: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'], datasets: monthDatasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: c.text, font: { size: 11 } } },
+          y: { stacked: true, beginAtZero: true, ticks: { precision: 0, color: c.text, font: { size: 11 } }, grid: { color: c.grid } }
+        },
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: c.text } },
+          tooltip: { callbacks: { label: ctx => ' ' + ctx.dataset.label + '：' + ctx.parsed.y + ' 本' } }
+        }
+      }
+    });
 
-function render(){
-  refreshYears();
-  const list=filtered();
-  const days=list.map(duration).filter(v=>v!==null);
-  const months=Array(12).fill(0);
-  list.forEach(r=>{const month=Number((r.endDate||'').slice(5,7));if(month>=1&&month<=12)months[month-1]++});
-  let peak=0,peakIndex=-1;months.forEach((value,index)=>{if(value>peak){peak=value;peakIndex=index}});
-  $('#total').textContent=list.length;
-  $('#kpTotal').textContent=list.filter(r=>r.role==='KP').length;
-  $('#plTotal').textContent=list.filter(r=>r.role==='PL').length;
-  $('#average').textContent=days.length?`${Math.round(days.reduce((a,b)=>a+b,0)/days.length)} 天`:'0 天';
-  $('#activeMonth').textContent=peakIndex<0?'—':`${peakIndex+1} 月（${peak} 本）`;
-  $('#count').textContent=`共 ${list.length} 筆`;
-  renderCharts(list);
+    const kp = finished.filter(r => r.role === 'KP').length;
+    const pl = finished.filter(r => r.role === 'PL').length;
+    const ot = finished.length - kp - pl;
+    const roleLabels = [], roleData = [], roleColors = [];
+    if (kp) { roleLabels.push('KP'); roleData.push(kp); roleColors.push(c.kp); }
+    if (pl) { roleLabels.push('PL'); roleData.push(pl); roleColors.push(c.pl); }
+    if (ot) { roleLabels.push('其他'); roleData.push(ot); roleColors.push(c.ot); }
 
-  $('#add').disabled=deleteMode;
-  $('#import').disabled=deleteMode;
-  $('#bulkDelete').textContent=deleteMode?'退出批量管理':'批量管理';
+    drawChart('chartRole', {
+      type: 'doughnut',
+      data: {
+        labels: roleLabels.length ? roleLabels : ['尚無資料'],
+        datasets: [{
+          data: roleData.length ? roleData : [1],
+          backgroundColor: roleData.length ? roleColors : [c.grid],
+          borderWidth: 0, hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '62%',
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, color: c.text } },
+          tooltip: {
+            enabled: roleData.length > 0,
+            callbacks: { label: ctx => ' ' + ctx.label + '：' + ctx.parsed + ' 本' }
+          }
+        }
+      }
+    });
 
-  const root=$('#records');
-  if(!list.length){
-    root.innerHTML=`<div class="empty">${records.length?'找不到符合條件的紀錄。':'還沒有紀錄。<br><strong>點「＋ 新增紀錄」開始，或匯入既有備份。</strong>'}</div>`;
+    drawChart('chartSize', {
+      type: 'bar',
+      data: {
+        labels: SIZES,
+        datasets: [{
+          data: SIZES.map(s => finished.filter(r => r.size === s).length),
+          backgroundColor: c.sizes, borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+        scales: {
+          x: { beginAtZero: true, ticks: { precision: 0, color: c.text, font: { size: 11 } }, grid: { color: c.grid } },
+          y: { grid: { display: false }, ticks: { color: c.text, font: { size: 12 } } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.x + ' 本' } }
+        }
+      }
+    });
+  }
+
+  /* ================= 列表 ================= */
+  function filteredList(){
+    const kw = searchEl.value.trim().toLowerCase();
+    const fr = filterRole.value;
+    const fs = filterSize.value;
+
+    let list = records.filter(r => {
+      if (fr !== 'all' && r.role !== fr) return false;
+      if (fs !== 'all' && r.size !== fs) return false;
+      if (kw) {
+        const hay = [r.title, r.system, r.note].join(' ').toLowerCase();
+        if (hay.indexOf(kw) === -1) return false;
+      }
+      return true;
+    });
+
+    const mode = sortEl.value;
+    list.sort((a, b) => {
+      if (mode === 'title') return a.title.localeCompare(b.title, 'zh-Hant');
+
+      if (mode === 'durDesc' || mode === 'durAsc') {
+        const da = daysBetween(a.startDate, a.endDate);
+        const db = daysBetween(b.startDate, b.endDate);
+        if (da === null && db === null) return 0;
+        if (da === null) return 1;
+        if (db === null) return -1;
+        return mode === 'durDesc' ? (db - da) : (da - db);
+      }
+
+      const oa = a.endDate ? 1 : 0;
+      const ob = b.endDate ? 1 : 0;
+      if (mode === 'newest' && oa !== ob) return oa - ob;   // 進行中置頂
+
+      const da = a.endDate || a.startDate || '';
+      const db = b.endDate || b.startDate || '';
+      return mode === 'oldest' ? da.localeCompare(db) : db.localeCompare(da);
+    });
+
+    return list;
+  }
+
+  function cardHTML(r){
+    const ongoing = !r.endDate;
+    const d = daysBetween(r.startDate, r.endDate);
+    const roleCls = r.role === 'KP' ? 'kp' : r.role === 'PL' ? 'pl' : 'ot';
+    const durText = d === null ? '' : (d === 0 ? '當日結團' : d + ' 天');
+
+    const check = deleteMode
+      ? '<input type="checkbox" class="row-check" data-check="' + esc(r.id) + '"' +
+        (selectedIds.has(r.id) ? ' checked' : '') + ' aria-label="選取此紀錄">'
+      : '';
+
+    const actions = deleteMode ? '' :
+      '<div class="card-actions">' +
+        '<button class="icon-btn" data-act="edit" data-id="' + esc(r.id) + '" title="編輯">✏️</button>' +
+        '<button class="icon-btn" data-act="del" data-id="' + esc(r.id) + '" title="刪除">🗑️</button>' +
+      '</div>';
+
+    return '<article class="card' + (ongoing ? ' ongoing' : '') + (deleteMode ? ' selecting' : '') +
+      '" data-id="' + esc(r.id) + '">' +
+        check +
+        '<div class="card-main">' +
+          '<div class="card-title">' +
+            '<h3>' + (esc(r.title) || '（未命名）') + '</h3>' +
+            '<div class="badges">' +
+              '<span class="badge ' + roleCls + '">' + esc(r.role) + '</span>' +
+              '<span class="tag">' + esc(r.size) + '</span>' +
+              (ongoing ? '<span class="badge live">進行中</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="meta">' +
+            (r.system ? '<span class="sys">' + esc(r.system) + '</span>' : '') +
+            '<span>' + fmtDate(r.startDate) + ' → ' + fmtDate(r.endDate) + '</span>' +
+            (durText ? '<span class="dur">' + durText + '</span>' : '') +
+          '</div>' +
+          (r.note ? '<div class="note">' + esc(r.note) + '</div>' : '') +
+        '</div>' +
+        actions +
+      '</article>';
+  }
+
+  function renderList(){
+    const list = filteredList();
+    countEl.textContent = '共 ' + list.length + ' 筆';
+
+    listEl.innerHTML = list.length
+      ? list.map(cardHTML).join('')
+      : '<p class="empty">' + (records.length
+          ? '找不到符合條件的記錄。'
+          : '還沒有任何記錄。<br><strong>新增第一筆，或先「匯入」既有備份吧 ✨</strong>') + '</p>';
+
     updateBulkBar();
-    return;
   }
-  root.innerHTML=list.map(r=>{
-    const actions=deleteMode
-      ? `<div class="record-actions"><input type="checkbox" class="row-check" data-check="${esc(r.id)}" ${selectedIds.has(r.id)?'checked':''} aria-label="選擇此紀錄"></div>`
-      : `<div class="record-actions"><button class="btn" data-edit="${esc(r.id)}" type="button">編輯</button></div>`;
-    return `<article class="record ${deleteMode?'selecting':''}" data-id="${esc(r.id)}">
-      <div>
-        <div class="record-title">${esc(r.title)}</div>
-        <div class="record-meta">
-          <span class="pill ${r.role==='KP'?'kp':'pl'}">${esc(r.role)}</span>
-          <span class="pill">${esc(r.size)}</span>
-          <span class="pill">開跑 ${esc(r.startDate||'未填')}</span>
-          <span class="pill">結團 ${esc(r.endDate||'未填')}</span>
-          ${duration(r)!==null?`<span class="pill">${duration(r)} 天</span>`:''}
-        </div>
-        ${r.note?`<div class="record-note">${esc(r.note)}</div>`:''}
-      </div>
-      ${actions}
-    </article>`;
-  }).join('');
-  updateBulkBar();
-}
 
-function openEditor(id){
-  editingId=id||null;
-  const r=records.find(x=>x.id===id);
-  $('#dialogTitle').textContent=r?'編輯紀錄':'新增紀錄';
-  $('#title').value=r?.title||'';
-  $('#role').value=r?.role||'KP';
-  $('#size').value=r?.size||'單人';
-  $('#startDate').value=r?.startDate||'';
-  $('#endDate').value=r?.endDate||'';
-  $('#note').value=r?.note||'';
-  $('#recordDialog').showModal();
-  $('#title').focus();
-}
+  function updateBulkBar(){
+    bulkbar.hidden = !deleteMode;
+    $('bulkToggle').textContent = deleteMode ? '退出批量' : '批量管理';
+    $('bulkToggle').classList.toggle('danger', deleteMode);
+    if (!deleteMode) return;
 
-function setDeleteMode(on){
-  if(on){
-    if(!records.length){alert('目前沒有資料。');return}
-    if(!confirm('進入批量管理模式？\n\n⚠️ 此模式可一次選取並刪除多筆紀錄，刪除後無法復原。\n建議先按「JSON 備份」匯出資料。\n\n要進入嗎？'))return;
+    const list = filteredList();
+    const n = selectedIds.size;
+    $('selectedCount').textContent = '已選 ' + n + ' 筆';
+
+    const del = $('deleteSelected');
+    del.disabled = n === 0;
+    del.textContent = n ? '刪除所選（' + n + '）' : '刪除所選';
+
+    const ids = list.map(r => r.id);
+    const all = ids.length > 0 && ids.every(id => selectedIds.has(id));
+    const some = ids.some(id => selectedIds.has(id));
+    const selAll = $('selectAll');
+    selAll.checked = all;
+    selAll.indeterminate = some && !all;
   }
-  deleteMode=on;
-  selectedIds.clear();
-  render();
-}
 
-$('#add').addEventListener('click',()=>openEditor());
-$('#cancel').addEventListener('click',()=>$('#recordDialog').close());
-$('#recordForm').addEventListener('submit',e=>{
-  e.preventDefault();
-  const title=$('#title').value.trim();
-  if(!title)return;
-  const startDate=$('#startDate').value,endDate=$('#endDate').value;
-  if(startDate&&endDate&&endDate<startDate&&!confirm('結團日早於開跑日，仍要儲存嗎？'))return;
-  const payload={title,role:$('#role').value,size:$('#size').value,startDate,endDate,note:$('#note').value.trim()};
-  const next=editingId?records.map(r=>r.id===editingId?{...r,...payload}:r):[...records,{id:makeId(),...payload}];
-  if(commit(next))$('#recordDialog').close();
-});
+  function renderAll(){
+    const finished = renderStats();
+    renderCharts(finished);
+    renderList();
+  }
 
-$('#records').addEventListener('change',e=>{
-  const check=e.target.closest('[data-check]');
-  if(!check)return;
-  const id=check.dataset.check;
-  if(check.checked)selectedIds.add(id);
-  else selectedIds.delete(id);
-  updateBulkBar();
-});
+  /* ================= 表單 ================= */
+  function resetForm(){
+    editingId = null;
+    form.reset();
+    f_role.value = 'KP';
+    f_size.value = '多人';
+    formTitle.textContent = '新增記錄';
+    submitBtn.textContent = '新增';
+    cancelEdit.hidden = true;
+  }
 
-$('#records').addEventListener('click',e=>{
-  if(deleteMode){
-    if(e.target.closest('[data-check]'))return;
-    const card=e.target.closest('.record');
-    if(card&&card.dataset.id){
-      const id=card.dataset.id;
-      if(selectedIds.has(id))selectedIds.delete(id);
-      else selectedIds.add(id);
-      render();
+  function startEdit(id){
+    const r = records.find(x => x.id === id);
+    if (!r) return;
+    editingId = id;
+    f_title.value  = r.title || '';
+    f_system.value = r.system || '';
+    f_role.value   = r.role || 'KP';
+    f_size.value   = r.size || '多人';
+    f_start.value  = r.startDate || '';
+    f_end.value    = r.endDate || '';
+    f_note.value   = r.note || '';
+    formTitle.textContent = '編輯記錄';
+    submitBtn.textContent = '儲存變更';
+    cancelEdit.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => f_title.focus(), 250);
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const data = {
+      title:     f_title.value.trim(),
+      system:    f_system.value.trim(),
+      role:      f_role.value,
+      size:      f_size.value,
+      startDate: f_start.value,
+      endDate:   f_end.value,
+      note:      f_note.value.trim()
+    };
+
+    if (!data.title) { f_title.focus(); return; }
+
+    if (data.startDate && data.endDate && data.endDate < data.startDate) {
+      alert('結團日期不能早於開跑日期喔');
+      return;
     }
-    return;
+
+    const next = editingId
+      ? records.map(r => r.id === editingId ? Object.assign({}, r, data) : r)
+      : records.concat([Object.assign({ id: uid() }, data)]);
+
+    if (saveRecords(next)) {
+      resetForm();
+      populateYears();
+      renderAll();
+    }
+  });
+
+  cancelEdit.addEventListener('click', resetForm);
+
+  /* ================= 列表操作 ================= */
+  listEl.addEventListener('change', e => {
+    const cb = e.target.closest('[data-check]');
+    if (!cb) return;
+    const id = cb.dataset.check;
+    if (cb.checked) selectedIds.add(id);
+    else selectedIds.delete(id);
+    updateBulkBar();
+  });
+
+  listEl.addEventListener('click', e => {
+    if (deleteMode) {
+      const card = e.target.closest('.card');
+      if (!card) return;
+      if (e.target.closest('[data-check]')) return;
+      const id = card.dataset.id;
+      if (selectedIds.has(id)) selectedIds.delete(id);
+      else selectedIds.add(id);
+      renderList();
+      return;
+    }
+
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+
+    if (btn.dataset.act === 'edit') {
+      startEdit(id);
+      return;
+    }
+
+    if (btn.dataset.act === 'del') {
+      const r = records.find(x => x.id === id);
+      if (!r) return;
+      if (confirm('確定刪除「' + r.title + '」？此操作無法復原。')) {
+        const next = records.filter(x => x.id !== id);
+        if (saveRecords(next)) {
+          if (editingId === id) resetForm();
+          selectedIds.delete(id);
+          populateYears();
+          renderAll();
+        }
+      }
+    }
+  });
+
+  searchEl.addEventListener('input', () => { if (deleteMode) selectedIds.clear(); renderList(); });
+  filterRole.addEventListener('change', () => { if (deleteMode) selectedIds.clear(); renderList(); });
+  filterSize.addEventListener('change', () => { if (deleteMode) selectedIds.clear(); renderList(); });
+  sortEl.addEventListener('change', () => { if (deleteMode) selectedIds.clear(); renderList(); });
+  yearSelect.addEventListener('change', renderAll);
+
+  /* ================= 批量管理 ================= */
+  $('bulkToggle').addEventListener('click', () => {
+    if (deleteMode) { deleteMode = false; selectedIds.clear(); renderList(); return; }
+    if (!records.length) { alert('目前沒有資料。'); return; }
+    if (!confirm('進入批量管理模式？\n\n⚠️ 此模式可一次選取並刪除多筆紀錄，刪除後無法復原。\n建議先按「匯出 → JSON 備份」。\n\n要進入嗎？')) return;
+    deleteMode = true;
+    selectedIds.clear();
+    renderList();
+  });
+
+  $('exitBulk').addEventListener('click', () => {
+    deleteMode = false;
+    selectedIds.clear();
+    renderList();
+  });
+
+  $('selectAll').addEventListener('change', e => {
+    const list = filteredList();
+    if (e.target.checked) list.forEach(r => selectedIds.add(r.id));
+    else list.forEach(r => selectedIds.delete(r.id));
+    renderList();
+  });
+
+  $('deleteSelected').addEventListener('click', () => {
+    const n = selectedIds.size;
+    if (!n) return;
+    if (!confirm('確定刪除所選的 ' + n + ' 筆紀錄？此操作無法復原。')) return;
+    const ids = new Set(selectedIds);
+    const next = records.filter(r => !ids.has(r.id));
+    selectedIds.clear();
+    if (saveRecords(next)) {
+      if (!records.length) deleteMode = false;
+      populateYears();
+      renderAll();
+    }
+  });
+
+  /* ================= 匯出 ================= */
+  function download(name, content, type){
+    const blob = new Blob([content], { type: type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1200);
   }
-  const edit=e.target.closest('[data-edit]');
-  if(edit)openEditor(edit.dataset.edit);
-});
 
-['search','filterYear','filterRole','filterSize','sort'].forEach(id=>$('#'+id).addEventListener(id==='search'?'input':'change',()=>{
-  if(deleteMode)selectedIds.clear();
-  render();
-}));
-
-$('#bulkDelete').addEventListener('click',()=>{
-  if(deleteMode){setDeleteMode(false);return}
-  setDeleteMode(true);
-});
-$('#exitDeleteMode').addEventListener('click',()=>setDeleteMode(false));
-
-$('#selectAll').addEventListener('change',e=>{
-  const list=filtered();
-  if(e.target.checked)list.forEach(r=>selectedIds.add(r.id));
-  else list.forEach(r=>selectedIds.delete(r.id));
-  render();
-});
-
-$('#deleteSelected').addEventListener('click',()=>{
-  const count=selectedIds.size;
-  if(!count)return;
-  const ids=new Set(selectedIds);
-  selectedIds.clear();
-  const next=records.filter(r=>!ids.has(r.id));
-  if(!commit(next))return;
-  if(!records.length)deleteMode=false;
-  render();
-});
-
-function download(name,content,type){
-  const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-function stamp(){return new Date().toISOString().slice(0,10).replaceAll('-','')}
-
-$('#exportJson').addEventListener('click',()=>{
-  if(!records.length){alert('目前沒有資料可匯出。');return}
-  download(`trpg-records-${stamp()}.json`,JSON.stringify(records,null,2),'application/json;charset=utf-8');
-});
-function csvCell(value){return '"'+String(value??'').replaceAll('"','""')+'"'}
-$('#exportCsv').addEventListener('click',()=>{
-  if(!records.length){alert('目前沒有資料可匯出。');return}
-  const rows=[['標題','角色','規模','開跑日','結團日','備註'],...records.map(r=>[r.title,r.role,r.size,r.startDate||'',r.endDate||'',r.note||''])];
-  download(`trpg-records-${stamp()}.csv`,'\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8');
-});
-$('#import').addEventListener('click',()=>{$('#fileName').textContent='尚未選擇檔案';selectedFile=null;$('#importDialog').showModal()});
-$('#importCancel').addEventListener('click',()=>$('#importDialog').close());
-$('#importForm').addEventListener('submit',e=>{e.preventDefault();const input=$('#file');input.value='';input.click()});
-$('#file').addEventListener('change',async e=>{
-  selectedFile=e.target.files?.[0]||null;
-  if(!selectedFile)return;
-  $('#fileName').textContent=selectedFile.name;
-  $('#importDialog').close();
-  try{await importFile(selectedFile)}catch(err){alert(`匯入失敗：${err.message}`)}finally{e.target.value=''}
-});
-function parseCSV(text){
-  const rows=[];let row=[],cell='',quoted=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(quoted){
-      if(c==='"'&&text[i+1]==='"'){cell+='"';i++}
-      else if(c==='"')quoted=false;
-      else cell+=c;
-    }else if(c==='"')quoted=true;
-    else if(c===','){row.push(cell);cell=''}
-    else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell=''}
-    else if(c!=='\r')cell+=c;
+  function stamp(){
+    const d = new Date();
+    return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
   }
-  if(quoted)throw Error('CSV 引號格式不完整');
-  if(cell.length||row.length){row.push(cell);rows.push(row)}
-  if(!rows.length)throw Error('檔案沒有資料');
-  const headers=rows.shift().map(x=>x.trim().replace(/^\uFEFF/,''));
-  const aliases={'標題':'title','title':'title','角色':'role','role':'role','規模':'size','size':'size','開跑日':'startDate','startDate':'startDate','結團日':'endDate','endDate':'endDate','備註':'note','note':'note'};
-  const map=headers.map(h=>aliases[h]);
-  if(!map.includes('title'))throw Error('CSV 必須包含「標題」或 title 欄位');
-  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(map.map((key,i)=>key?[key,r[i]||'']:null).filter(Boolean)));
-}
-function normalizeDate(value){
-  const s=String(value??'').trim();
-  if(!s)return'';
-  const match=s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
-  if(!match)return null;
-  const year=Number(match[1]),month=Number(match[2]),day=Number(match[3]);
-  const date=new Date(Date.UTC(year,month-1,day));
-  if(date.getUTCFullYear()!==year||date.getUTCMonth()!==month-1||date.getUTCDate()!==day)return null;
-  return`${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-}
-function normalizeImport(row,index){
-  if(!row||typeof row!=='object'||Array.isArray(row))return null;
-  const title=String(row.title??'').trim();
-  if(!title)return null;
-  const role=String(row.role||'KP').toUpperCase(),size=String(row.size||'單人').trim();
-  if(!['KP','PL'].includes(role)||!SIZES.includes(size))return null;
-  const startDate=normalizeDate(row.startDate),endDate=normalizeDate(row.endDate);
-  if(startDate===null||endDate===null)return null;
-  return{id:makeId()+index,title,role,size,startDate,endDate,note:String(row.note??'')};
-}
-function signature(r){return[r.title.trim().toLocaleLowerCase(),r.role,r.size,r.startDate||'',r.endDate||'',(r.note||'').trim()].join('\u001f')}
-async function importFile(file){
-  const text=await file.text();
-  let parsed;
-  if(/\.csv$/i.test(file.name)||file.type==='text/csv')parsed=parseCSV(text);
-  else{
-    const data=JSON.parse(text);
-    parsed=Array.isArray(data)?data:(data&&Array.isArray(data.records)?data.records:null);
-    if(!parsed)throw Error('JSON 必須是紀錄陣列，或包含 records 陣列');
+
+  function exportJSON(){
+    if (!records.length) { alert('目前沒有記錄可以匯出'); return; }
+    download('trpg-records-' + stamp() + '.json', JSON.stringify(records, null, 2), 'application/json;charset=utf-8');
   }
-  const normalized=parsed.map(normalizeImport).filter(Boolean);
-  if(!normalized.length)throw Error('沒有可匯入的有效紀錄（請檢查標題、角色、規模與日期欄位）');
-  if(normalized.length<parsed.length&&!confirm(`${parsed.length-normalized.length} 筆資料格式不正確，會略過；仍要匯入其餘 ${normalized.length} 筆嗎？`))return;
-  let next;
-  if($('#importMode').value==='replace'){
-    if(!confirm(`以 ${normalized.length} 筆匯入資料覆蓋目前 ${records.length} 筆紀錄？建議先下載 JSON 備份。`))return;
-    next=normalized;
-  }else{
-    const seen=new Set(records.map(signature));
-    const fresh=normalized.filter(r=>{const key=signature(r);if(seen.has(key))return false;seen.add(key);return true});
-    if(!fresh.length){alert(`沒有新增資料；${normalized.length} 筆已存在的紀錄已略過。`);return}
-    next=[...records,...fresh];
-    if(!confirm(`準備新增 ${fresh.length} 筆紀錄${fresh.length<normalized.length?`，略過 ${normalized.length-fresh.length} 筆重複紀錄`:''}。繼續嗎？`))return;
+
+  function csvCell(v){
+    return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
   }
-  if(commit(next))alert(`匯入完成，目前共有 ${records.length} 筆紀錄。`);
-}
-$('#theme').addEventListener('click',()=>{
-  const dark=document.documentElement.dataset.theme!=='dark';
-  document.documentElement.dataset.theme=dark?'dark':'light';
-  $('#theme').textContent=dark?'☀️':'🌙';
-  try{localStorage.setItem(THEME_KEY,dark?'dark':'light')}catch{}
-  render();
-});
-try{
-  const saved=localStorage.getItem(THEME_KEY),dark=saved?saved==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.dataset.theme=dark?'dark':'light';
-  $('#theme').textContent=dark?'☀️':'🌙';
-}catch{}
-if(typeof Chart==='undefined'){
-  const fallback=document.createElement('script');
-  fallback.src='https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js';
-  fallback.onload=()=>render();
-  fallback.onerror=()=>console.warn('Chart.js 無法載入，圖表暫時無法顯示。');
-  document.head.appendChild(fallback);
-}
-render();
+
+  function exportCSV(){
+    if (!records.length) { alert('目前沒有記錄可以匯出'); return; }
+    const rows = [['標題', '系統', '角色', '規模', '開跑日', '結團日', '備註']].concat(
+      records.map(r => [r.title, r.system, r.role, r.size, r.startDate || '', r.endDate || '', r.note || ''])
+    );
+    const csv = '\uFEFF' + rows.map(row => row.map(csvCell).join(',')).join('\r\n');
+    download('trpg-records-' + stamp() + '.csv', csv, 'text/csv;charset=utf-8');
+  }
+
+  exportBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const willOpen = exportMenu.hidden;
+    exportMenu.hidden = !willOpen;
+    exportBtn.setAttribute('aria-expanded', String(willOpen));
+  });
+
+  exportMenu.addEventListener('click', e => {
+    const b = e.target.closest('[data-export]');
+    if (!b) return;
+    exportMenu.hidden = true;
+    exportBtn.setAttribute('aria-expanded', 'false');
+    if (b.dataset.export === 'csv') exportCSV();
+    else exportJSON();
+  });
+
+  document.addEventListener('click', e => {
+    if (!exportMenu.hidden && !e.target.closest('.menu-wrap')) {
+      exportMenu.hidden = true;
+      exportBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !exportMenu.hidden) {
+      exportMenu.hidden = true;
+      exportBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  /* ================= 匯入 ================= */
+  $('importBtn').addEventListener('click', () => importFile.click());
+
+  importFile.addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      await doImport(file);
+    } catch (err) {
+      alert('匯入失敗：' + (err && err.message ? err.message : '未知錯誤'));
+    }
+  });
+
+  function parseCSV(text){
+    const rows = [];
+    let row = [], cell = '', quoted = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else cell += c;
+      } else if (c === '"') quoted = true;
+      else if (c === ',') { row.push(cell); cell = ''; }
+      else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+      else if (c !== '\r') cell += c;
+    }
+    if (quoted) throw new Error('CSV 引號格式不完整');
+    if (cell.length || row.length) { row.push(cell); rows.push(row); }
+    if (!rows.length) throw new Error('檔案沒有資料');
+
+    const headers = rows.shift().map(h => h.trim().replace(/^\uFEFF/, ''));
+    const alias = {
+      '標題':'title', 'title':'title',
+      '系統':'system', 'system':'system',
+      '角色':'role', '身份':'role', 'role':'role',
+      '規模':'size', '人數類型':'size', 'size':'size',
+      '開跑日':'startDate', '開跑日期':'startDate', 'startDate':'startDate',
+      '結團日':'endDate', '結團日期':'endDate', 'endDate':'endDate',
+      '備註':'note', 'note':'note'
+    };
+    const keys = headers.map(h => alias[h] || null);
+    if (keys.indexOf('title') === -1) throw new Error('CSV 必須包含「標題」或 title 欄位');
+
+    return rows
+      .filter(r => r.some(v => String(v).trim()))
+      .map(r => {
+        const obj = {};
+        keys.forEach((k, i) => { if (k) obj[k] = r[i] == null ? '' : r[i]; });
+        return obj;
+      });
+  }
+
+  function signature(r){
+    return [r.title.trim().toLowerCase(), r.role, r.size, r.startDate || '', r.endDate || '', r.note || ''].join('\u001f');
+  }
+
+  async function doImport(file){
+    const text = await file.text();
+    let parsed;
+
+    if (/\.csv$/i.test(file.name) || (file.type && file.type.indexOf('csv') > -1)) {
+      parsed = parseCSV(text);
+    } else {
+      const data = JSON.parse(text);
+      parsed = Array.isArray(data) ? data : (data && Array.isArray(data.records) ? data.records : null);
+      if (!parsed) throw new Error('JSON 格式不正確（需為紀錄陣列，或包含 records 陣列）');
+    }
+
+    const normalized = parsed.map(normalizeRecord).filter(Boolean);
+    const skipped = parsed.length - normalized.length;
+
+    if (!normalized.length) throw new Error('沒有可匯入的有效紀錄（請檢查標題、角色、規模與日期欄位）');
+
+    if (skipped && !confirm('有 ' + skipped + ' 筆資料格式不正確，將會略過。\n要繼續匯入其餘 ' + normalized.length + ' 筆嗎？')) return;
+
+    const replace = confirm(
+      '讀取到 ' + normalized.length + ' 筆紀錄。\n\n' +
+      '按「確定」＝覆蓋目前 ' + records.length + ' 筆資料\n' +
+      '按「取消」＝合併（略過重複紀錄）'
+    );
+
+    let next;
+    if (replace) {
+      next = normalized.map(r => Object.assign({}, r, { id: uid() }));
+    } else {
+      const seen = new Set(records.map(signature));
+      const fresh = [];
+      normalized.forEach(r => {
+        const k = signature(r);
+        if (seen.has(k)) return;
+        seen.add(k);
+        fresh.push(Object.assign({}, r, { id: uid() }));
+      });
+      if (!fresh.length) { alert('沒有新增資料，全部為重複紀錄。'); return; }
+      next = records.concat(fresh);
+    }
+
+    if (saveRecords(next)) {
+      deleteMode = false;
+      selectedIds.clear();
+      resetForm();
+      populateYears();
+      renderAll();
+      alert('匯入完成 ✅ 目前共有 ' + records.length + ' 筆紀錄。');
+    }
+  }
+
+  /* ================= 主題 ================= */
+  function applyTheme(theme){
+    document.documentElement.dataset.theme = theme;
+    themeBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+    themeBtn.setAttribute('aria-label', theme === 'dark' ? '切換至亮色主題' : '切換至深色主題');
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = theme === 'dark' ? '#0e0f16' : '#f5f6fa';
+    if (records.length || document.readyState === 'complete') renderAll();
+  }
+
+  themeBtn.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    applyTheme(next);
+  });
+
+  /* ================= 初始化 ================= */
+  records = loadRecords();
+  populateYears();
+  resetForm();
+
+  let savedTheme = null;
+  try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
+  applyTheme(savedTheme === 'light' ? 'light' : 'dark');
+
+  renderAll();
+
+  /* Chart.js CDN 失敗時的自動重試 */
+  if (typeof Chart === 'undefined') {
+    const fallback = document.createElement('script');
+    fallback.src = 'https://unpkg.com/chart.js@4.4.1/dist/chart.umd.min.js';
+    fallback.onload = () => renderAll();
+    fallback.onerror = () => console.warn('Chart.js 無法載入，圖表暫時無法顯示。');
+    document.head.appendChild(fallback);
+  }
+
+})();
 </script>
 </body>
 </html>
