@@ -73,6 +73,10 @@
   button{touch-action:manipulation}
   .wrap{max-width:1080px;margin:0 auto}
 
+  /* ---------- 彈窗時鎖定背景捲動 ---------- */
+  html.modal-open,
+  body.modal-open{overflow:hidden}
+
   /* ---------- Header ---------- */
   header{
     display:flex;align-items:flex-start;justify-content:space-between;
@@ -233,6 +237,52 @@
   .full{grid-column:1/-1}
   .form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 
+  /* ---------- 表單彈出視窗（不影響頁面捲動） ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:80;
+    background:rgba(8,9,15,.62);
+    -webkit-backdrop-filter:blur(4px);
+    backdrop-filter:blur(4px);
+    animation:overlayIn .18s ease-out;
+  }
+  .overlay[hidden]{display:none}
+  html[data-theme="light"] .overlay{background:rgba(30,34,48,.38)}
+  @keyframes overlayIn{from{opacity:0}to{opacity:1}}
+
+  #formPanel.modal{
+    position:fixed;z-index:90;
+    top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:min(680px, calc(100vw - 24px));
+    max-height:calc(100vh - 48px);
+    max-height:calc(100dvh - 48px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    margin:0;
+    padding:22px;
+    background:var(--card);
+    border-color:var(--border-strong);
+    box-shadow:0 30px 80px -24px rgba(0,0,0,.78), 0 0 0 1px rgba(255,255,255,.03);
+    animation:formIn .2s cubic-bezier(.2,.9,.3,1);
+  }
+  #formPanel.modal>h2{padding-right:40px}
+  @keyframes formIn{
+    from{opacity:0;transform:translate(-50%,-48%) scale(.97)}
+    to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  }
+
+  .modal-close{
+    position:absolute;top:12px;right:12px;
+    width:34px;height:34px;padding:0;
+    display:none;align-items:center;justify-content:center;
+    background:transparent;border:1px solid transparent;border-radius:9px;
+    color:var(--muted);font-size:15px;line-height:1;cursor:pointer;
+    transition:.15s;
+  }
+  #formPanel.modal .modal-close{display:inline-flex}
+  .modal-close:hover{background:var(--hover);color:var(--text)}
+
   /* ---------- 列表 ---------- */
   .list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
   .list-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
@@ -359,6 +409,22 @@
     .bulkbar .btn{width:100%}
     .bulkbar .spacer{display:none}
     input,select,textarea{font-size:16px}
+
+    /* 手機：表單變成底部彈出面板 */
+    #formPanel.modal{
+      top:auto;bottom:0;left:0;
+      transform:none;
+      width:100%;
+      max-height:88vh;
+      max-height:88dvh;
+      padding:20px 16px calc(20px + env(safe-area-inset-bottom));
+      border-radius:18px 18px 0 0;
+      animation:formInMobile .22s cubic-bezier(.2,.9,.3,1);
+    }
+    @keyframes formInMobile{
+      from{opacity:0;transform:translateY(26px)}
+      to{opacity:1;transform:translateY(0)}
+    }
   }
   @media (hover:none){
     .card:hover{border-color:var(--border)}
@@ -405,7 +471,7 @@
       <summary>① 新增一筆記錄</summary>
       <div class="faq-body">
         <ol>
-          <li>點右上角「＋ 新增記錄」，表單會展開。</li>
+          <li>點右上角「＋ 新增記錄」，表單會以彈出視窗出現。</li>
           <li><b>劇本名稱</b>一定要填，其他欄位之後再補也可以。</li>
           <li>還沒跑完？<b>結團日留空</b>就好，會標成「進行中」。</li>
           <li>按「新增」，記錄就會出現在下面的列表。</li>
@@ -418,6 +484,7 @@
       <div class="faq-body">
         <ul>
           <li>每筆記錄右邊有三個小圖示：<b>⧉ 複製</b>、<b>✏️ 編輯</b>、<b>🗑️ 刪除</b>。</li>
+          <li>按編輯時，表單會在畫面中央彈出，<b>頁面不會被捲動</b>，改完關掉就回到原本的位置。</li>
           <li>要一次刪很多筆 → 點「批量管理」，勾選後再按刪除（會先請你確認）。</li>
         </ul>
       </div>
@@ -533,8 +600,10 @@
     <div class="list" id="list" aria-live="polite"></div>
   </section>
 
-  <!-- 表單（預設收起，由「新增記錄」按鈕展開） -->
+  <!-- 表單（彈出視窗，由「新增記錄」或「編輯」開啟） -->
+  <div class="overlay" id="formOverlay" hidden></div>
   <section class="panel" id="formPanel" hidden>
+    <button type="button" class="modal-close" id="formClose" aria-label="關閉表單">✕</button>
     <h2 id="formTitle">新增記錄</h2>
     <form id="recordForm" autocomplete="off">
       <div class="form-grid">
@@ -610,6 +679,8 @@
   const yearSelect = $('yearSelect');
   const statsEl    = $('stats');
   const formPanel  = $('formPanel');
+  const formOverlay= $('formOverlay');
+  const formClose  = $('formClose');
   const newBtn     = $('newBtn');
   const form       = $('recordForm');
   const formTitle  = $('formTitle');
@@ -1105,10 +1176,40 @@
     });
   });
 
-  /* ================= 表單開關 ================= */
+  /* ================= 背景捲動鎖定 ================= */
+  let scrollLockPad = null;
+  function lockScroll(){
+    if (scrollLockPad !== null) return;
+    const gap = window.innerWidth - document.documentElement.clientWidth;
+    scrollLockPad = document.body.style.paddingRight || '';
+    if (gap > 0) {
+      const cur = parseFloat(getComputedStyle(document.body).paddingRight) || 0;
+      document.body.style.paddingRight = (cur + gap) + 'px';
+    }
+    document.documentElement.classList.add('modal-open');
+    document.body.classList.add('modal-open');
+  }
+  function unlockScroll(){
+    if (scrollLockPad === null) return;
+    document.body.style.paddingRight = scrollLockPad;
+    scrollLockPad = null;
+    document.documentElement.classList.remove('modal-open');
+    document.body.classList.remove('modal-open');
+  }
+
+  /* ================= 表單開關（彈出視窗，不捲動頁面） ================= */
   function setFormOpen(open){
-    formPanel.hidden = !open;
-    newBtn.textContent = open ? '收起表單' : '＋ 新增記錄';
+    if (open) {
+      formPanel.hidden = false;
+      formPanel.classList.add('modal');
+      formOverlay.hidden = false;
+      lockScroll();
+    } else {
+      formPanel.hidden = true;
+      formPanel.classList.remove('modal');
+      formOverlay.hidden = true;
+      unlockScroll();
+    }
     newBtn.setAttribute('aria-expanded', String(open));
   }
 
@@ -1124,19 +1225,30 @@
 
   function openForm(){
     setFormOpen(true);
-    formPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => { try { f_title.focus({ preventScroll: true }); } catch (e) { f_title.focus(); } }, 280);
+    // 不呼叫 scrollIntoView：彈窗是 fixed，頁面捲動位置完全不變
+    setTimeout(() => {
+      try { f_title.focus({ preventScroll: true }); }
+      catch (e) { try { f_title.focus(); } catch (e2) {} }
+    }, 60);
+  }
+
+  function closeForm(){
+    resetForm();
+    setFormOpen(false);
   }
 
   newBtn.addEventListener('click', () => {
     if (!formPanel.hidden) {          // 已展開 → 收起
-      resetForm();
-      setFormOpen(false);
+      closeForm();
       return;
     }
     resetForm();                      // 展開 → 新增模式
     openForm();
   });
+
+  formClose.addEventListener('click', closeForm);
+
+  formOverlay.addEventListener('click', closeForm);
 
   function startEdit(id){
     const r = records.find(x => x.id === id);
@@ -1180,17 +1292,13 @@
       : records.concat([Object.assign({ id: uid() }, data)]);
 
     if (saveRecords(next)) {
-      resetForm();
-      setFormOpen(false);
+      closeForm();
       populateYears();
       renderAll();
     }
   });
 
-  cancelEdit.addEventListener('click', () => {
-    resetForm();
-    setFormOpen(false);
-  });
+  cancelEdit.addEventListener('click', closeForm);
 
   /* ================= 列表操作 ================= */
   listEl.addEventListener('change', e => {
@@ -1254,7 +1362,7 @@
       if (confirm('確定刪除「' + r.title + '」？此操作無法復原。')) {
         const next = records.filter(x => x.id !== id);
         if (saveRecords(next)) {
-          if (editingId === id) { resetForm(); setFormOpen(false); }
+          if (editingId === id) closeForm();
           selectedIds.delete(id);
           populateYears();
           renderAll();
@@ -1366,9 +1474,14 @@
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !exportMenu.hidden) {
+    if (e.key !== 'Escape') return;
+    if (!exportMenu.hidden) {
       exportMenu.hidden = true;
       exportBtn.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    if (!formPanel.hidden) {
+      closeForm();
     }
   });
 
@@ -1475,8 +1588,7 @@
     if (saveRecords(next)) {
       deleteMode = false;
       selectedIds.clear();
-      resetForm();
-      setFormOpen(false);
+      closeForm();
       populateYears();
       renderAll();
       alert('匯入完成 ✅ 目前共有 ' + records.length + ' 筆紀錄。');
