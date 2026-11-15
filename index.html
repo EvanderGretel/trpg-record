@@ -145,7 +145,7 @@
   <header class="header">
     <div>
       <h1>TRPG 團務紀錄</h1>
-      <p class="subtitle">開跑 → 結團 ｜ KP / PL ｜ 單人 / 雙人 / 多人</p>
+      <p class="subtitle">開跑 → 結團 ｜ KP / PL ｜ 單人 / 1v1 / 雙人 / 多人</p>
     </div>
     <div class="header-actions">
       <button class="btn icon" id="theme" type="button" aria-label="切換深色模式" title="切換主題">🌙</button>
@@ -175,7 +175,7 @@
   <section class="charts" aria-label="團務圖表">
     <article class="panel wide"><h2>每月結團數（依結團月份）</h2><div class="canvas-box"><canvas id="chartMonth" aria-label="每月 KP 與 PL 結團數堆疊長條圖"></canvas></div></article>
     <article class="panel"><h2>角色比例</h2><div class="canvas-box"><canvas id="chartRole" aria-label="KP 與 PL 比例圓環圖"></canvas></div></article>
-    <article class="panel"><h2>人數規模</h2><div class="canvas-box"><canvas id="chartSize" aria-label="單人、雙人、多人團務數量橫向長條圖"></canvas></div></article>
+    <article class="panel"><h2>人數規模</h2><div class="canvas-box"><canvas id="chartSize" aria-label="單人、1v1、雙人、多人團務數量橫向長條圖"></canvas></div></article>
   </section>
 
   <section class="toolbar" aria-label="紀錄工具">
@@ -184,7 +184,7 @@
       <input class="control" id="search" type="search" placeholder="搜尋標題 / 備註…">
       <select class="control" id="filterYear" aria-label="依年份篩選"><option value="all">全部年份</option></select>
       <select class="control" id="filterRole" aria-label="依角色篩選"><option value="all">全部角色</option><option value="KP">KP</option><option value="PL">PL</option></select>
-      <select class="control" id="filterSize" aria-label="依規模篩選"><option value="all">全部規模</option><option>單人</option><option>雙人</option><option>多人</option></select>
+      <select class="control" id="filterSize" aria-label="依規模篩選"><option value="all">全部規模</option><option>單人</option><option>1v1</option><option>雙人</option><option>多人</option></select>
       <select class="control" id="sort" aria-label="排序方式">
         <option value="newest">結團日（新到舊）</option>
         <option value="oldest">結團日（舊到新）</option>
@@ -218,7 +218,7 @@
     <div class="form-grid">
       <div class="field full"><label for="title">標題 *</label><input id="title" name="title" required maxlength="200" placeholder="團務標題"></div>
       <div class="field"><label for="role">角色</label><select id="role" name="role"><option>KP</option><option>PL</option></select></div>
-      <div class="field"><label for="size">規模</label><select id="size" name="size"><option>單人</option><option>雙人</option><option>多人</option></select></div>
+      <div class="field"><label for="size">規模</label><select id="size" name="size"><option>單人</option><option>1v1</option><option>雙人</option><option>多人</option></select></div>
       <div class="field"><label for="startDate">開跑日</label><input id="startDate" name="startDate" type="date"></div>
       <div class="field"><label for="endDate">結團日</label><input id="endDate" name="endDate" type="date"></div>
       <div class="field full"><label for="note">備註</label><textarea id="note" name="note" maxlength="5000" placeholder="KP、PL 或其他備註"></textarea></div>
@@ -233,7 +233,7 @@
 <dialog id="importDialog">
   <form id="importForm">
     <h2>匯入資料</h2>
-    <p class="import-help">支援此工具匯出的 JSON 陣列、舊版 JSON 格式，以及 { format, version, exportedAt, records } 包裝格式；也支援包含標題、角色、規模、開跑日、結團日、備註欄位的 CSV。匯入時會檢查欄位，並可選擇覆蓋或合併。</p>
+    <p class="import-help">支援此工具匯出的 JSON 陣列、舊版 JSON 格式，以及 { format, version, exportedAt, records } 包裝格式；也支援包含標題、角色、規模（單人／1v1／雙人／多人）、開跑日、結團日、備註欄位的 CSV。匯入時會檢查欄位，並可選擇覆蓋或合併。</p>
     <div class="field">
       <label for="importMode">匯入方式</label>
       <select id="importMode">
@@ -252,13 +252,14 @@
 <script>
 'use strict';
 const KEY='trpg_records_v1',THEME_KEY='trpg_theme_v1';
+const SIZES=['單人','1v1','雙人','多人'];
 const $=s=>document.querySelector(s);
 let records=readRecords(),editingId=null,selectedFile=null,charts={};
 let deleteMode=false;
 const selectedIds=new Set();
 
 function makeId(){return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,9)}
-function validRecord(r){return r&&typeof r==='object'&&!Array.isArray(r)&&typeof r.title==='string'&&r.title.trim()&&['KP','PL'].includes(r.role)&&['單人','雙人','多人'].includes(r.size)}
+function validRecord(r){return r&&typeof r==='object'&&!Array.isArray(r)&&typeof r.title==='string'&&r.title.trim()&&['KP','PL'].includes(r.role)&&SIZES.includes(r.size)}
 function readRecords(){try{const value=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(value)?value.filter(validRecord):[]}catch{return []}}
 function commit(next){try{localStorage.setItem(KEY,JSON.stringify(next));records=next;render();return true}catch(error){console.error('localStorage 儲存失敗',error);alert('儲存失敗：瀏覽器儲存空間可能已滿，資料未變更。請匯出備份或釋放儲存空間後再試。');render();return false}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -307,7 +308,7 @@ function filtered(){
   });
 }
 
-function themeColors(){const dark=document.documentElement.dataset.theme==='dark';return{text:dark?'#aab1c2':'#5b6274',grid:dark?'#2a2e3b':'#f0f1f7',kp:dark?'#9d84ff':'#7c5cff',pl:dark?'#3ec9b8':'#2bb3a3',size:dark?['#f0b458','#6aabff','#f0789a']:['#f2a33c','#5b9dff','#e0607e']}}
+function themeColors(){const dark=document.documentElement.dataset.theme==='dark';return{text:dark?'#aab1c2':'#5b6274',grid:dark?'#2a2e3b':'#f0f1f7',kp:dark?'#9d84ff':'#7c5cff',pl:dark?'#3ec9b8':'#2bb3a3',size:dark?['#f0b458','#3ec9b8','#6aabff','#f0789a']:['#f2a33c','#2bb3a3','#5b9dff','#e0607e']}}
 function drawChart(id,config){if(typeof Chart==='undefined')return;if(charts[id])charts[id].destroy();charts[id]=new Chart(document.getElementById(id),config)}
 function renderCharts(list){
   if(typeof Chart==='undefined')return;
@@ -332,10 +333,9 @@ function renderCharts(list){
       plugins:{legend:{position:'bottom',labels:{usePointStyle:true,color:c.text}},tooltip:{callbacks:{label:x=>` ${x.label}：${x.parsed} 本`}}}
     }
   });
-  const sizes=['單人','雙人','多人'];
   drawChart('chartSize',{
     type:'bar',
-    data:{labels:sizes,datasets:[{data:sizes.map(size=>list.filter(r=>r.size===size).length),backgroundColor:c.size,borderRadius:6}]},
+    data:{labels:SIZES,datasets:[{data:SIZES.map(size=>list.filter(r=>r.size===size).length),backgroundColor:c.size,borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
       scales:{x:{beginAtZero:true,ticks:{precision:0,color:c.text},grid:{color:c.grid}},y:{grid:{display:false},ticks:{color:c.text}}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>` ${x.parsed.x} 本`}}}
@@ -562,8 +562,8 @@ function normalizeImport(row,index){
   if(!row||typeof row!=='object'||Array.isArray(row))return null;
   const title=String(row.title??'').trim();
   if(!title)return null;
-  const role=String(row.role||'KP').toUpperCase(),size=String(row.size||'單人');
-  if(!['KP','PL'].includes(role)||!['單人','雙人','多人'].includes(size))return null;
+  const role=String(row.role||'KP').toUpperCase(),size=String(row.size||'單人').trim();
+  if(!['KP','PL'].includes(role)||!SIZES.includes(size))return null;
   const startDate=normalizeDate(row.startDate),endDate=normalizeDate(row.endDate);
   if(startDate===null||endDate===null)return null;
   return{id:makeId()+index,title,role,size,startDate,endDate,note:String(row.note??'')};
