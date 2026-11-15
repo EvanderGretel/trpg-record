@@ -278,7 +278,36 @@
   }
   .empty strong{color:var(--text)}
 
-  footer{text-align:center;font-size:11.5px;color:var(--muted);opacity:.75;margin-top:26px;line-height:1.9}
+  footer{text-align:center;font-size:11.5px;color:var(--muted);opacity:.85;margin-top:26px;line-height:1.9}
+  footer .warn{
+    display:block;margin:16px auto 0;max-width:560px;
+    padding:0;border:none;background:none;
+    text-align:center;line-height:1.95;
+    font-size:11px;letter-spacing:.01em;
+    opacity:.72;
+  }
+
+  /* ---------- 說明面板 ---------- */
+  .help-lead{margin:0 0 4px;font-size:12.5px;color:var(--muted);line-height:1.7}
+  .faq{border-top:1px solid var(--border)}
+  .faq:first-of-type{border-top:none}
+  .faq>summary{
+    list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;
+    padding:13px 2px;font-size:14px;font-weight:600;color:var(--text);
+    transition:color .15s;
+  }
+  .faq>summary::-webkit-details-marker{display:none}
+  .faq>summary:hover{color:var(--accent)}
+  .faq>summary::after{
+    content:'＋';margin-left:auto;font-size:15px;font-weight:400;
+    color:var(--muted);transition:transform .2s;flex:none;
+  }
+  .faq[open]>summary{color:var(--accent)}
+  .faq[open]>summary::after{transform:rotate(45deg)}
+  .faq-body{padding:0 2px 16px;font-size:13px;line-height:1.8;color:var(--muted)}
+  .faq-body ol,.faq-body ul{margin:0;padding-left:19px}
+  .faq-body li{margin:5px 0}
+  .faq-body b{color:var(--text);font-weight:600}
 
   @media (max-width:720px){
     .charts{grid-template-columns:1fr}
@@ -330,6 +359,7 @@
       <button class="btn icon" id="reloadBtn" type="button" title="重新整理（等同 Ctrl+Shift+R 強制刷新）" aria-label="重新整理頁面">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
       </button>
+      <button class="btn" id="helpBtn" type="button" aria-expanded="false" aria-controls="helpPanel">❓ 說明</button>
       <div class="menu-wrap">
         <button class="btn" id="exportBtn" type="button" aria-haspopup="true" aria-expanded="false">⬇ 匯出</button>
         <div class="menu" id="exportMenu" hidden>
@@ -341,6 +371,66 @@
       <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" hidden>
     </div>
   </header>
+
+  <!-- 使用說明（預設收起） -->
+  <section class="panel" id="helpPanel" hidden>
+    <h2>使用說明</h2>
+    <p class="help-lead">第一次用？照順序看就好，每段都可以點開。</p>
+
+    <details class="faq">
+      <summary>① 新增一筆記錄</summary>
+      <div class="faq-body">
+        <ol>
+          <li>點右上角「＋ 新增記錄」，表單會展開。</li>
+          <li><b>劇本名稱</b>一定要填，其他欄位之後再補也可以。</li>
+          <li>還沒跑完？<b>結團日留空</b>就好，會標成「進行中」。</li>
+          <li>按「新增」，記錄就會出現在下面的列表。</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>② 修改、複製或刪除</summary>
+      <div class="faq-body">
+        <ul>
+          <li>每筆記錄右邊有三個小圖示：<b>⧉ 複製</b>、<b>✏️ 編輯</b>、<b>🗑️ 刪除</b>。</li>
+          <li>要一次刪很多筆 → 點「批量管理」，勾選後再按刪除（會先請你確認）。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>③ 統計和圖表在看什麼</summary>
+      <div class="faq-body">
+        <ul>
+          <li>右上角可切換年份，選「全部年份」就是全部。</li>
+          <li>只有<b>填了結團日</b>的記錄才算進統計，進行中的不算。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>④ 找不到某筆記錄？</summary>
+      <div class="faq-body">
+        <ul>
+          <li>搜尋框可以搜<b>劇本名稱、系統、備註</b>。</li>
+          <li>旁邊的選單可以篩身份、人數，也能改排序方式。</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="faq">
+      <summary>⑤ 備份！換裝置前一定要看</summary>
+      <div class="faq-body">
+        <ul>
+          <li>資料只存在這台裝置的瀏覽器裡，不會上傳到任何地方。</li>
+          <li>定期按「⬇ 匯出 → JSON 備份」存一份檔案。</li>
+          <li>換手機或電腦時，在新裝置按「⬆ 匯入」選那個檔案就能還原。</li>
+          <li>清除瀏覽器資料或使用無痕模式，記錄可能會消失。</li>
+        </ul>
+      </div>
+    </details>
+  </section>
 
   <!-- 統計 -->
   <section class="panel">
@@ -470,7 +560,8 @@
 
   <footer>
     資料儲存在此瀏覽器的 localStorage · 建議定期「匯出」備份<br>
-    換裝置時用「匯入」還原 · 清除瀏覽器資料可能導致紀錄消失
+    換裝置時用「匯入」還原 · 清除瀏覽器資料可能導致紀錄消失<br>
+    <span class="warn">⚠️ 本工具由 AI 協助製作，可能仍有 Bug 或未盡完善之處，<br>使用前請自行評估；若發現問題，歡迎直接修改原始碼或回報</span>
   </footer>
 </div>
 
@@ -509,6 +600,8 @@
   const bulkbar    = $('bulkbar');
   const themeBtn   = $('themeBtn');
   const reloadBtn  = $('reloadBtn');
+  const helpBtn    = $('helpBtn');
+  const helpPanel  = $('helpPanel');
   const exportBtn  = $('exportBtn');
   const exportMenu = $('exportMenu');
   const importFile = $('importFile');
@@ -589,6 +682,31 @@
       alert('儲存失敗：瀏覽器儲存空間可能已滿，資料未變更。\n建議先「匯出」備份，或清理瀏覽器空間後再試。');
       return false;
     }
+  }
+
+  /* ================= 首次開啟的範例資料 ================= */
+  function seedSampleIfEmpty(){
+    try {
+      if (localStorage.getItem(KEY) !== null) return;   // 已有資料（含空陣列）就不動
+    } catch (e) { return; }
+
+    const pad = n => String(n).padStart(2, '0');
+    const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    const now   = new Date();
+    const end   = new Date(now.getTime() - 7  * 86400000);
+    const start = new Date(now.getTime() - 21 * 86400000);
+
+    const sample = {
+      id: 'sample-' + uid(),
+      title: '範例：不要叫醒沉睡的貓',
+      system: 'CoC 7th',
+      role: 'KP',
+      size: '多人',
+      startDate: iso(start),
+      endDate: iso(end),
+      note: '這是一筆範例記錄，讓你看看資料長什麼樣子。\n看完可以直接按右邊的 🗑️ 刪掉，不影響使用。\n\n小提示：結團日留空，這筆就會顯示「進行中」，也不會計入結團統計。'
+    };
+    try { localStorage.setItem(KEY, JSON.stringify([sample])); } catch (e) {}
   }
 
   /* ================= 年份 ================= */
@@ -1300,6 +1418,15 @@
     applyTheme(next);
   });
 
+  /* ================= 說明面板 ================= */
+  helpBtn.addEventListener('click', () => {
+    const willOpen = helpPanel.hidden;
+    helpPanel.hidden = !willOpen;
+    helpBtn.textContent = willOpen ? '✕ 收起說明' : '❓ 說明';
+    helpBtn.setAttribute('aria-expanded', String(willOpen));
+    if (willOpen) helpPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
   /* ================= 重新整理 ================= */
   reloadBtn.addEventListener('click', () => {
     // 表單裡有沒存的內容 → 先問一下
@@ -1318,6 +1445,7 @@
   });
 
   /* ================= 初始化 ================= */
+  seedSampleIfEmpty();
   records = loadRecords();
   populateYears();
   resetForm();
