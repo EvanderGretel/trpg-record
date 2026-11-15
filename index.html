@@ -131,6 +131,7 @@
     margin-bottom:18px;
     backdrop-filter:blur(6px);
   }
+  .panel[hidden]{display:none}
   .panel h2{margin:0 0 14px;font-size:15px;font-weight:600;letter-spacing:.04em;color:var(--text);opacity:.92}
 
   /* ---------- 統計 ---------- */
@@ -362,8 +363,50 @@
     </div>
   </section>
 
-  <!-- 表單 -->
+  <!-- 列表 -->
   <section class="panel">
+    <div class="list-head">
+      <h2>團務記錄 <span id="count"></span></h2>
+      <div class="list-tools">
+        <input id="search" type="search" placeholder="搜尋劇本／系統／備註">
+        <select id="filterRole" aria-label="依身份篩選">
+          <option value="all">全部身份</option>
+          <option value="KP">只看 KP</option>
+          <option value="PL">只看 PL</option>
+          <option value="其他">只看其他</option>
+        </select>
+        <select id="filterSize" aria-label="依人數類型篩選">
+          <option value="all">全部規模</option>
+          <option value="1v1">1v1</option>
+          <option value="單人">單人</option>
+          <option value="雙人">雙人</option>
+          <option value="多人">多人</option>
+        </select>
+        <select id="sort" aria-label="排序方式">
+          <option value="newest">結團日（新→舊）</option>
+          <option value="oldest">結團日（舊→新）</option>
+          <option value="durDesc">團期（長→短）</option>
+          <option value="durAsc">團期（短→長）</option>
+          <option value="title">標題</option>
+        </select>
+        <button class="btn" id="bulkToggle" type="button">批量管理</button>
+        <button class="btn primary" id="newBtn" type="button" aria-expanded="false" aria-controls="formPanel">＋ 新增記錄</button>
+      </div>
+    </div>
+
+    <div class="bulkbar" id="bulkbar" hidden>
+      <label class="bulk-check"><input type="checkbox" id="selectAll"> 全選目前顯示</label>
+      <span class="sel-count" id="selectedCount">已選 0 筆</span>
+      <span class="spacer"></span>
+      <button class="btn danger" id="deleteSelected" type="button" disabled>刪除所選</button>
+      <button class="btn" id="exitBulk" type="button">退出批量</button>
+    </div>
+
+    <div class="list" id="list" aria-live="polite"></div>
+  </section>
+
+  <!-- 表單（預設收起，由「新增記錄」按鈕展開） -->
+  <section class="panel" id="formPanel" hidden>
     <h2 id="formTitle">新增記錄</h2>
     <form id="recordForm" autocomplete="off">
       <div class="form-grid">
@@ -382,8 +425,8 @@
         </label>
         <label>人數類型
           <select id="f_size">
-            <option value="單人">單人</option>
             <option value="1v1">1v1</option>
+            <option value="單人">單人</option>
             <option value="雙人">雙人</option>
             <option value="多人" selected>多人</option>
           </select>
@@ -403,47 +446,6 @@
         <button type="button" class="btn ghost" id="cancelEdit" hidden>取消編輯</button>
       </div>
     </form>
-  </section>
-
-  <!-- 列表 -->
-  <section class="panel">
-    <div class="list-head">
-      <h2>團務記錄 <span id="count"></span></h2>
-      <div class="list-tools">
-        <input id="search" type="search" placeholder="搜尋劇本／系統／備註">
-        <select id="filterRole" aria-label="依身份篩選">
-          <option value="all">全部身份</option>
-          <option value="KP">只看 KP</option>
-          <option value="PL">只看 PL</option>
-          <option value="其他">只看其他</option>
-        </select>
-        <select id="filterSize" aria-label="依人數類型篩選">
-          <option value="all">全部規模</option>
-          <option value="單人">單人</option>
-          <option value="1v1">1v1</option>
-          <option value="雙人">雙人</option>
-          <option value="多人">多人</option>
-        </select>
-        <select id="sort" aria-label="排序方式">
-          <option value="newest">結團日（新→舊）</option>
-          <option value="oldest">結團日（舊→新）</option>
-          <option value="durDesc">團期（長→短）</option>
-          <option value="durAsc">團期（短→長）</option>
-          <option value="title">標題</option>
-        </select>
-        <button class="btn" id="bulkToggle" type="button">批量管理</button>
-      </div>
-    </div>
-
-    <div class="bulkbar" id="bulkbar" hidden>
-      <label class="bulk-check"><input type="checkbox" id="selectAll"> 全選目前顯示</label>
-      <span class="sel-count" id="selectedCount">已選 0 筆</span>
-      <span class="spacer"></span>
-      <button class="btn danger" id="deleteSelected" type="button" disabled>刪除所選</button>
-      <button class="btn" id="exitBulk" type="button">退出批量</button>
-    </div>
-
-    <div class="list" id="list" aria-live="polite"></div>
   </section>
 
   <datalist id="systems">
@@ -473,11 +475,13 @@
   const KEY = 'trpg_records_v1';
   const THEME_KEY = 'trpg_theme_v1';
   const ROLES = ['KP','PL','其他'];
-  const SIZES = ['單人','1v1','雙人','多人'];
+  const SIZES = ['1v1','單人','雙人','多人'];   // 1v1 置於最前
 
   const $ = id => document.getElementById(id);
   const yearSelect = $('yearSelect');
   const statsEl    = $('stats');
+  const formPanel  = $('formPanel');
+  const newBtn     = $('newBtn');
   const form       = $('recordForm');
   const formTitle  = $('formTitle');
   const submitBtn  = $('submitBtn');
@@ -860,7 +864,7 @@
       ? list.map(cardHTML).join('')
       : '<p class="empty">' + (records.length
           ? '找不到符合條件的記錄。'
-          : '還沒有任何記錄。<br><strong>新增第一筆，或先「匯入」既有備份吧 ✨</strong>') + '</p>';
+          : '還沒有任何記錄。<br><strong>點右上「＋ 新增記錄」，或先「匯入」既有備份吧 ✨</strong>') + '</p>';
 
     flashId = null;
     updateBulkBar();
@@ -894,7 +898,13 @@
     renderList();
   }
 
-  /* ================= 表單 ================= */
+  /* ================= 表單開關 ================= */
+  function setFormOpen(open){
+    formPanel.hidden = !open;
+    newBtn.textContent = open ? '收起表單' : '＋ 新增記錄';
+    newBtn.setAttribute('aria-expanded', String(open));
+  }
+
   function resetForm(){
     editingId = null;
     form.reset();
@@ -904,6 +914,22 @@
     submitBtn.textContent = '新增';
     cancelEdit.hidden = true;
   }
+
+  function openForm(){
+    setFormOpen(true);
+    formPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { try { f_title.focus({ preventScroll: true }); } catch (e) { f_title.focus(); } }, 280);
+  }
+
+  newBtn.addEventListener('click', () => {
+    if (!formPanel.hidden) {          // 已展開 → 收起
+      resetForm();
+      setFormOpen(false);
+      return;
+    }
+    resetForm();                      // 展開 → 新增模式
+    openForm();
+  });
 
   function startEdit(id){
     const r = records.find(x => x.id === id);
@@ -919,8 +945,7 @@
     formTitle.textContent = '編輯記錄';
     submitBtn.textContent = '儲存變更';
     cancelEdit.hidden = false;
-    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => f_title.focus(), 250);
+    openForm();
   }
 
   form.addEventListener('submit', e => {
@@ -949,12 +974,16 @@
 
     if (saveRecords(next)) {
       resetForm();
+      setFormOpen(false);
       populateYears();
       renderAll();
     }
   });
 
-  cancelEdit.addEventListener('click', resetForm);
+  cancelEdit.addEventListener('click', () => {
+    resetForm();
+    setFormOpen(false);
+  });
 
   /* ================= 列表操作 ================= */
   listEl.addEventListener('change', e => {
@@ -1018,7 +1047,7 @@
       if (confirm('確定刪除「' + r.title + '」？此操作無法復原。')) {
         const next = records.filter(x => x.id !== id);
         if (saveRecords(next)) {
-          if (editingId === id) resetForm();
+          if (editingId === id) { resetForm(); setFormOpen(false); }
           selectedIds.delete(id);
           populateYears();
           renderAll();
@@ -1240,6 +1269,7 @@
       deleteMode = false;
       selectedIds.clear();
       resetForm();
+      setFormOpen(false);
       populateYears();
       renderAll();
       alert('匯入完成 ✅ 目前共有 ' + records.length + ' 筆紀錄。');
@@ -1266,6 +1296,7 @@
   records = loadRecords();
   populateYears();
   resetForm();
+  setFormOpen(false);
 
   let savedTheme = null;
   try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
