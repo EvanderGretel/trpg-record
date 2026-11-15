@@ -152,7 +152,6 @@
   html[data-theme="light"] .stat.big .stat-value{text-shadow:none}
   .stat-value .unit{font-size:15px;font-weight:500;color:var(--muted);margin-left:5px;text-shadow:none}
   .stat-value.small{font-size:28px;color:var(--accent2)}
-  .stat-sub{font-size:12px;color:var(--muted);margin-top:10px}
 
   .roles{margin-top:2px}
   .role-row{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:13px}
@@ -604,8 +603,6 @@
     const inYear = d => y === 'all' || (!!d && d.slice(0, 4) === y);
 
     const finished = records.filter(r => r.endDate && inYear(r.endDate));
-    const started  = records.filter(r => r.startDate && inYear(r.startDate));
-    const ongoing  = records.filter(r => !r.endDate);
     const total    = finished.length;
 
     const kp = finished.filter(r => r.role === 'KP').length;
@@ -624,7 +621,6 @@
       '<div class="stat big">' +
         '<div class="stat-label">' + (y === 'all' ? '結團總數' : y + ' 年結團') + '</div>' +
         '<div class="stat-value">' + total + '<span class="unit">本</span></div>' +
-        '<div class="stat-sub">開跑 ' + started.length + ' 本 · 進行中 ' + ongoing.length + ' 本</div>' +
       '</div>' +
       '<div class="stat">' +
         '<div class="stat-label">身份分佈</div>' +
@@ -645,7 +641,6 @@
       '<div class="stat">' +
         '<div class="stat-label">平均結團時長</div>' +
         '<div class="stat-value small">' + avg + '<span class="unit">天</span></div>' +
-        '<div class="stat-sub">' + durations.length + ' 本有完整起訖日期</div>' +
       '</div>';
 
     return finished;
