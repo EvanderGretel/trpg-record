@@ -360,6 +360,35 @@
     opacity:.72;
   }
 
+  /* ---------- 浮動滾動按鈕（上／下） ---------- */
+  .scroll-nav{
+    position:fixed;
+    right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));
+    z-index:60;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .scroll-nav[hidden]{display:none}
+  body.modal-open .scroll-nav{display:none}
+  .scroll-btn{
+    width:46px;height:46px;padding:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    background:var(--card);
+    border:1px solid var(--border-strong);
+    color:var(--text);
+    font-size:18px;line-height:1;font-weight:700;
+    cursor:pointer;
+    -webkit-backdrop-filter:blur(8px);
+    backdrop-filter:blur(8px);
+    box-shadow:0 12px 28px -12px rgba(0,0,0,.75);
+    opacity:0;transform:translateY(10px) scale(.9);pointer-events:none;
+    transition:opacity .22s ease,transform .22s ease,border-color .15s,background .15s,color .15s;
+  }
+  .scroll-btn.show{opacity:.94;transform:none;pointer-events:auto}
+  .scroll-btn:hover{opacity:1;border-color:var(--accent);color:var(--accent);background:var(--hover)}
+  .scroll-btn:active{transform:scale(.93)}
+
   /* ---------- 說明面板 ---------- */
   .help-lead{margin:0 0 4px;font-size:12.5px;color:var(--muted);line-height:1.7}
   .faq{border-top:1px solid var(--border)}
@@ -428,6 +457,10 @@
     .bulkbar .btn{width:100%}
     .bulkbar .spacer{display:none}
     input,select,textarea{font-size:16px}
+
+    /* 手機：浮動滾動按鈕縮小一點 */
+    .scroll-nav{right:12px;bottom:calc(12px + env(safe-area-inset-bottom));gap:6px}
+    .scroll-btn{width:44px;height:44px;font-size:17px}
 
     /* 手機：表單變成底部彈出面板 */
     .panel.modal{
@@ -541,6 +574,7 @@
         <ul>
           <li>搜尋框可以搜<b>劇本名稱、系統、劇本類型、備註</b>。</li>
           <li>旁邊的選單可以篩身份、人數，也能改排序方式。</li>
+          <li>資料變多、頁面變長時，右下角會出現 <b>↑／↓ 浮動按鈕</b>，一鍵回到頂部或跳到最底部。</li>
         </ul>
       </div>
     </details>
@@ -744,6 +778,12 @@
   </footer>
 </div>
 
+<!-- 浮動滾動按鈕（回到頂部 / 直達底部） -->
+<div class="scroll-nav" id="scrollNav" hidden>
+  <button class="scroll-btn" id="scrollTop" type="button" title="回到頂部" aria-label="回到頂部">↑</button>
+  <button class="scroll-btn" id="scrollBottom" type="button" title="直達底部" aria-label="直達底部">↓</button>
+</div>
+
 <script>
 (function(){
   'use strict';
@@ -810,6 +850,9 @@
   const catCancel    = $('catCancel');
   const catSizeCount = $('catSizeCount');
   const catTypeCount = $('catTypeCount');
+  const scrollNav    = $('scrollNav');
+  const scrollTopBtn = $('scrollTop');
+  const scrollBottomBtn = $('scrollBottom');
 
   /* ================= 狀態 ================= */
   let records   = [];
@@ -880,6 +923,38 @@
       note: String(r.note == null ? '' : r.note).trim()
     };
   }
+
+  /* ================= 浮動滾動按鈕 ================= */
+  function updateScrollNav(){
+    const y    = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+    const docH = Math.max(
+      document.body.scrollHeight, document.documentElement.scrollHeight,
+      document.body.offsetHeight, document.documentElement.offsetHeight,
+      document.body.clientHeight, document.documentElement.clientHeight
+    );
+    const winH = window.innerHeight || document.documentElement.clientHeight;
+    const maxY = Math.max(0, docH - winH);
+    const need = maxY > 240;
+
+    scrollNav.hidden = !need;
+    if (!need) {
+      scrollTopBtn.classList.remove('show');
+      scrollBottomBtn.classList.remove('show');
+      return;
+    }
+    scrollTopBtn.classList.toggle('show', y > 120);
+    scrollBottomBtn.classList.toggle('show', y < maxY - 120);
+  }
+
+  scrollTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  scrollBottomBtn.addEventListener('click', () => {
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', updateScrollNav, { passive: true });
+  window.addEventListener('resize', updateScrollNav);
+  window.addEventListener('load', updateScrollNav);
 
   /* ================= 分類 ================= */
   function loadCategories(){
@@ -1394,6 +1469,7 @@
     const shown = renderStats();
     if (chartsOpen) renderCharts(shown, statsMode === 'ongoing');
     renderList();
+    requestAnimationFrame(updateScrollNav);
   }
 
   /* ================= 統計範圍切換 ================= */
@@ -1418,6 +1494,7 @@
     chartsToggle.textContent = chartsOpen ? '收起圖表 ▴' : '展開圖表 ▾';
     chartsToggle.setAttribute('aria-expanded', String(chartsOpen));
     if (chartsOpen) renderAll();
+    else requestAnimationFrame(updateScrollNav);
   });
 
   /* ================= 背景捲動鎖定 ================= */
@@ -1439,6 +1516,7 @@
     scrollLockPad = null;
     document.documentElement.classList.remove('modal-open');
     document.body.classList.remove('modal-open');
+    requestAnimationFrame(updateScrollNav);
   }
 
   /* ================= 表單開關 ================= */
@@ -2028,7 +2106,10 @@
     helpPanel.hidden = !willOpen;
     helpBtn.textContent = willOpen ? '✕ 收起說明' : '❓ 說明';
     helpBtn.setAttribute('aria-expanded', String(willOpen));
-    if (willOpen) helpPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (willOpen) {
+      helpPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    setTimeout(updateScrollNav, 400);
   });
 
   /* ================= 重新整理 ================= */
@@ -2061,6 +2142,7 @@
   applyTheme(savedTheme === 'light' ? 'light' : 'dark');
 
   renderAll();
+  updateScrollNav();
 
   /* Chart.js CDN 失敗時的自動重試 */
   if (typeof Chart === 'undefined') {
